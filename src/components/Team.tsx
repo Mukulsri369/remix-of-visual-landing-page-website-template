@@ -48,19 +48,19 @@ export function Team() {
       mustacheStyle: "curly"
     },
     {
-      name: "India Regional Storefront (₹)",
-      crime: "MONOLITH.STORE/?GEO=IN",
-      bounty: "18.4k Visitors/mo",
-      description: "Automatic GST-inclusive INR (₹) pricing display (e.g. Titanium Pro Smartphone ₹1,34,900) with verified affiliate attribution for Flipkart, Amazon India, and Myntra Luxe.",
+      name: "Global Multi-Country Routing",
+      crime: "ALL COUNTRIES SUPPORTED",
+      bounty: "190+ Markets",
+      description: "Automatic local currency display ($, ₹, £, €, CA$, A$, AED & more) with verified affiliate attribution across Amazon Global, Flipkart, Myntra, Nordstrom, Sephora, and regional marketplaces.",
       image: connorPhoto,
       rotation: 'rotate-1',
       mustacheStyle: "villainous"
     },
     {
-      name: "USA Regional Storefront ($)",
-      crime: "MONOLITH.STORE/?GEO=US",
-      bounty: "42.1k Visitors/mo",
-      description: "1-day Prime dispatch routing for US shoppers ($1,199.00) with native support for LTK, Rakuten, Amazon Associates US, Best Buy, B&H Photo, and Nordstrom.",
+      name: "On-Demand Country Expansion",
+      crime: "ADD COUNTRIES ANYTIME LATER",
+      bounty: "Instant Scale",
+      description: "Launch with your primary audience markets today and seamlessly add new countries, currencies, and local retail affiliate networks anytime as your international following grows.",
       image: zaraPhoto,
       rotation: '-rotate-1',
       mustacheStyle: "artistic"

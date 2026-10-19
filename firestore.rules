@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isValidPrototypeRequest(data) {
+      return data.keys().hasAll(['uid', 'userEmail', 'name', 'handle', 'niche', 'theme', 'regions', 'storeDescription', 'createdAt']) &&
+        data.keys().hasOnly(['uid', 'userEmail', 'name', 'handle', 'niche', 'theme', 'regions', 'storeDescription', 'createdAt']) &&
+        data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 && data.uid == request.auth.uid &&
+        data.userEmail is string && data.userEmail.size() >= 3 && data.userEmail.size() <= 255 && data.userEmail == request.auth.token.email &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.handle is string && data.handle.size() >= 1 && data.handle.size() <= 255 &&
+        data.niche is string && data.niche.size() >= 1 && data.niche.size() <= 100 &&
+        data.theme is string && data.theme.size() >= 1 && data.theme.size() <= 100 &&
+        data.regions is string && data.regions.size() >= 1 && data.regions.size() <= 500 &&
+        data.storeDescription is string && data.storeDescription.size() >= 0 && data.storeDescription.size() <= 1500 &&
+        data.createdAt == request.time;
+    }
+
+    match /prototype_requests/{requestId} {
+      allow get: if isSignedIn() && isValidId(requestId) && existing().uid == request.auth.uid;
+      allow list: if isSignedIn() && existing().uid == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(requestId) && isValidPrototypeRequest(incoming());
+      allow update, delete: if false;
+    }
+  }
+}

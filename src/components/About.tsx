@@ -29,7 +29,7 @@ export function About() {
     {
       number: "04",
       title: "Global Geo-Routing",
-      description: "Automatic India INR (₹) & Flipkart/Myntra + USA USD ($) & Amazon/Nordstrom routing",
+      description: "Automatic local currency & retail routing for all countries worldwide—plus add new countries anytime later",
       color: "accent-blue"
     },
     {

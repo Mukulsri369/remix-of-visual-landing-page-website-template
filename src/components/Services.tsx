@@ -19,7 +19,7 @@ export function Services() {
     {
       id: 'brand-films',
       title: "Cross-Border Geo Routing", 
-      description: "Visitors in India automatically see INR (₹) pricing and Flipkart, Myntra, or Amazon India links—while US visitors see USD ($) and Amazon US or Nordstrom routes.",
+      description: "Build storefronts for audiences in any country worldwide—automatically localizing currencies and retail links (US, UK, India, EU, Canada, Australia, UAE & more) with the flexibility to add new countries anytime later.",
       color: 'accent-blue',
       rotation: '-rotate-1',
       image: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=300&fit=crop&auto=format'

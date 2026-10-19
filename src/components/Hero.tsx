@@ -44,6 +44,14 @@ export function Hero() {
           videoRef.current.volume = isMuted ? 0 : 0.7
         }
       })
+
+      // Ensure video loops cleanly before the 51.5s mark
+      videoRef.current.addEventListener('timeupdate', () => {
+        if (videoRef.current && videoRef.current.currentTime >= 51.4) {
+          videoRef.current.currentTime = 0
+          videoRef.current.play().catch(() => {})
+        }
+      })
       
       // Try to play the video
       const playPromise = videoRef.current.play()
@@ -107,7 +115,7 @@ export function Hero() {
         loop
         playsInline
       >
-        <source src="https://mojli.s3.us-east-2.amazonaws.com/Mojli+Website+upscaled+(12mb).webm" type="video/webm" />
+        <source src="/hero-video.webm" type="video/webm" />
         Your browser does not support the video tag.
       </video>
 
@@ -317,7 +325,7 @@ export function Hero() {
       >
         <div className="max-w-3xl">
           <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-white/80 mb-2">
-            Creator Storefront Engine · India & USA Geo-Routing · One-Time Ownership
+            Creator Storefront Engine · Global Multi-Country Geo-Routing · One-Time Ownership
           </p>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black leading-tight text-white">
             <span className="block">ONE LINK FOR YOUR</span>
@@ -325,7 +333,7 @@ export function Hero() {
             <span className="block">STOREFRONT</span>
           </h1>
           <p className="text-sm sm:text-base text-white/85 mt-3 max-w-xl leading-relaxed">
-            Turn scattered product links into a flagship shopping destination. Visitors explore your curated collections, discover complementary pieces, and check out directly on trusted global retailers.
+            Turn scattered product links into a flagship shopping destination for visitors in every country. Automatically route shoppers to localized currencies and retailers worldwide—and easily add more countries anytime later.
           </p>
         </div>
       </motion.div>

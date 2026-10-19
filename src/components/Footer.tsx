@@ -2,18 +2,18 @@
 
 export function Footer() {
   const aiTools = [
-    'Amazon Associates US',
-    'Amazon Associates India',
-    'Flipkart Affiliate',
-    'Myntra Luxe',
+    'Amazon Global (All Regions)',
+    'Flipkart & Myntra Luxe',
     'Nordstrom & Saks',
     'Sephora & Ulta',
     'Best Buy & B&H Photo',
-    'LTK & Rakuten',
-    'CJ Affiliate',
+    'LTK & Rakuten Global',
+    'CJ & Awin Affiliate',
     'Shopify Direct Brands',
-    'INR (₹) Geo-Routing',
-    'USD ($) Geo-Routing'
+    'Global Currency Geo-Routing',
+    'Add New Countries Anytime',
+    '1-Click Price & Stock Sync',
+    '100% Creator Ownership'
   ]
 
   return (
@@ -27,7 +27,7 @@ export function Footer() {
                 CREATE YOUR OWN AFFILIATE STORE
               </div>
               <p className="text-background/70 leading-relaxed mb-6">
-                Turn your affiliate recommendations into a branded shopping destination with automated product ingestion, global geo-routing, and sovereign ownership.
+                Turn your affiliate recommendations into a branded shopping destination for every country worldwide—with automated product ingestion, global geo-routing, and the flexibility to add new countries anytime later.
               </p>
               {/* Social Media Icons */}
               <div className="flex items-center space-x-6">
@@ -92,11 +92,11 @@ export function Footer() {
           {/* Supported Networks & Capabilities Section */}
           <div className="col-span-12 md:col-span-8">
             <div>
-              <h4 className="font-black text-2xl text-background mb-4">SUPPORTED NETWORKS &amp; CAPABILITIES</h4>
+              <h4 className="font-black text-2xl text-background mb-4">SUPPORTED NETWORKS &amp; GLOBAL CAPABILITIES</h4>
               
               {/* Description */}
               <p className="text-background/70 text-base mb-8 leading-relaxed">
-                We integrate seamlessly with global retail marketplaces and affiliate networks for automated product ingestion, real-time stock validation, and localized India (₹) &amp; USA ($) checkout routing.
+                We integrate seamlessly with global retail marketplaces and affiliate networks across all countries for automated product ingestion, real-time stock validation, and localized multi-currency checkout routing—with the ability to add new countries anytime.
               </p>
               
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
