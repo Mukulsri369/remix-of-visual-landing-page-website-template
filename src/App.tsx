@@ -6,6 +6,7 @@ import { Services } from './components/Services'
 import { Team } from './components/Team'
 import { Contact } from './components/Contact'
 import { Footer } from './components/Footer'
+import { Toaster } from './components/ui/toaster'
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
         </section>
       </main>
       <Footer />
+      <Toaster />
     </div>
   )
 }

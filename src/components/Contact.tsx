@@ -3,22 +3,31 @@ import { useToast } from '@/hooks/use-toast'
 
 export function Contact() {
   const { toast } = useToast()
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+  const [formData, setFormData] = useState({
+    name: '',
+    handle: '',
+    niche: 'fashion',
+    theme: 'atelier',
+    region: 'both'
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      toast({ title: 'Please fill in all fields', variant: 'destructive' })
+    if (!formData.name.trim() || !formData.handle.trim()) {
+      toast({ title: 'Please fill in your name and social handle', variant: 'destructive' })
       return
     }
     setIsSubmitting(true)
-    // Simulate submission — connect to a backend to actually send
     setTimeout(() => {
-      toast({ title: 'Message sent!', description: "We'll get back to you soon." })
-      setFormData({ name: '', email: '', message: '' })
+      toast({
+        title: 'Application received!',
+        description: 'Our design team will reach out within 4 business hours with your custom storefront preview.'
+      })
+      setIsSubmitted(true)
       setIsSubmitting(false)
-    }, 1000)
+    }, 800)
   }
 
   return (
@@ -29,17 +38,17 @@ export function Contact() {
           <div className="inline-flex items-center gap-3 mb-6">
             <div className="w-3 h-3 bg-accent-emerald rounded-full animate-pulse" />
             <span className="text-sm font-semibold text-muted-foreground">
-              Let's Create Together
+              Fast-Track Onboarding
             </span>
             <div className="w-3 h-3 bg-accent-blue rounded-full animate-pulse" />
           </div>
           
           <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight mb-8">
-            <span className="block mb-2">Ready to Light Up the Screen?</span>
+            <span className="block mb-2">DM “STORE” on Instagram to get started.</span>
           </h2>
           
           <p className="text-2xl lg:text-3xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-            Tell us about your project and we'll get back to you with a plan to bring your vision to cinematic reality
+            Want a custom preview for your creator brand? Message our design desk with your social handle and we will prepare a live storefront concept within 4 hours.
           </p>
         </div>
 
@@ -47,18 +56,23 @@ export function Contact() {
         <div className="max-w-3xl mx-auto">
           <div className="bg-background clean-border rounded-3xl overflow-hidden elevated-shadow">
             <div className="bg-card/50 px-8 py-6 border-b border-border">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-accent-blue block mb-1">
+                    Direct Application
+                  </span>
                   <h3 className="text-xl font-black text-foreground mb-1">
-                    Get In Touch
+                    Reserve Your Storefront Build
                   </h3>
-                  <p className="text-muted-foreground">
-                    Fill out the form and we'll respond within 24 hours
+                  <p className="text-muted-foreground text-sm">
+                    Share your creator profile to receive a tailored storefront prototype.
                   </p>
                 </div>
-                <div className="hidden sm:flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-accent-emerald rounded-full" />
-                  <span className="text-sm text-muted-foreground font-medium">Available now</span>
+                  <span className="text-sm text-muted-foreground font-medium">
+                    Avg. reply: &lt; 20 mins · 12 build slots / month
+                  </span>
                 </div>
               </div>
             </div>
@@ -66,48 +80,132 @@ export function Contact() {
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-semibold text-foreground mb-2">Name</label>
+                  <label htmlFor="intake-name" className="block text-sm font-semibold text-foreground mb-2">
+                    Full Name
+                  </label>
                   <input
-                    id="name"
+                    id="intake-name"
                     type="text"
                     maxLength={100}
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) => {
+                      setIsSubmitted(false)
+                      setFormData(prev => ({ ...prev, name: e.target.value }))
+                    }}
                     className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
-                    placeholder="Your name"
+                    placeholder="Sarah Jenkins"
+                    required
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">Email</label>
+                  <label htmlFor="intake-handle" className="block text-sm font-semibold text-foreground mb-2">
+                    Primary Social Handle or URL
+                  </label>
                   <input
-                    id="email"
-                    type="email"
+                    id="intake-handle"
+                    type="text"
                     maxLength={255}
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    value={formData.handle}
+                    onChange={(e) => {
+                      setIsSubmitted(false)
+                      setFormData(prev => ({ ...prev, handle: e.target.value }))
+                    }}
                     className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
-                    placeholder="your@email.com"
+                    placeholder="@sarah.curates"
+                    required
                   />
                 </div>
               </div>
-              <div>
-                <label htmlFor="message" className="block text-sm font-semibold text-foreground mb-2">Message</label>
-                <textarea
-                  id="message"
-                  rows={5}
-                  maxLength={1000}
-                  value={formData.message}
-                  onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all resize-none"
-                  placeholder="Tell us about your project..."
-                />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="intake-niche" className="block text-sm font-semibold text-foreground mb-2">
+                    Creator Niche
+                  </label>
+                  <select
+                    id="intake-niche"
+                    value={formData.niche}
+                    onChange={(e) => setFormData(prev => ({ ...prev, niche: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
+                  >
+                    <option value="fashion">Fashion &amp; Luxury Apparel</option>
+                    <option value="tech">Consumer Tech &amp; Studio Audio</option>
+                    <option value="beauty">Skincare, Fragrance &amp; Beauty</option>
+                    <option value="home">Interior Design &amp; Home</option>
+                    <option value="fitness">Fitness &amp; Performance Gear</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="intake-theme" className="block text-sm font-semibold text-foreground mb-2">
+                    Preferred Storefront Style
+                  </label>
+                  <select
+                    id="intake-theme"
+                    value={formData.theme}
+                    onChange={(e) => setFormData(prev => ({ ...prev, theme: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
+                  >
+                    <option value="atelier">Atelier Luxury (Editorial)</option>
+                    <option value="cyber">Cyber Hardware (Matte Dark)</option>
+                    <option value="nordic">Nordic Living (Warm Minimal)</option>
+                    <option value="lumiere">Lumière (Clean Skincare)</option>
+                  </select>
+                </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Primary Audience Region
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <label className="px-4 py-3 rounded-xl bg-card border border-border flex items-center gap-2.5 cursor-pointer hover:bg-accent transition-colors">
+                    <input
+                      type="radio"
+                      name="geo-focus"
+                      value="both"
+                      checked={formData.region === 'both'}
+                      onChange={(e) => setFormData(prev => ({ ...prev, region: e.target.value }))}
+                      className="accent-foreground"
+                    />
+                    <span className="text-sm font-medium text-foreground">India + USA</span>
+                  </label>
+                  <label className="px-4 py-3 rounded-xl bg-card border border-border flex items-center gap-2.5 cursor-pointer hover:bg-accent transition-colors">
+                    <input
+                      type="radio"
+                      name="geo-focus"
+                      value="us"
+                      checked={formData.region === 'us'}
+                      onChange={(e) => setFormData(prev => ({ ...prev, region: e.target.value }))}
+                      className="accent-foreground"
+                    />
+                    <span className="text-sm font-medium text-foreground">USA Only</span>
+                  </label>
+                  <label className="px-4 py-3 rounded-xl bg-card border border-border flex items-center gap-2.5 cursor-pointer hover:bg-accent transition-colors">
+                    <input
+                      type="radio"
+                      name="geo-focus"
+                      value="in"
+                      checked={formData.region === 'in'}
+                      onChange={(e) => setFormData(prev => ({ ...prev, region: e.target.value }))}
+                      className="accent-foreground"
+                    />
+                    <span className="text-sm font-medium text-foreground">India Only</span>
+                  </label>
+                </div>
+              </div>
+
+              {isSubmitted && (
+                <div className="p-4 rounded-xl bg-accent-emerald/10 border border-accent-emerald/30 text-accent-emerald text-sm font-medium text-center">
+                  ✓ Application received! Our design team will reach out within 4 business hours with your custom storefront preview.
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-xl bg-foreground text-background font-black text-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="w-full py-4 rounded-xl bg-foreground text-background font-black text-lg hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
               >
-                {isSubmitting ? 'Sending...' : 'Send Message'}
+                {isSubmitting ? 'Submitting Application...' : 'Request Storefront Prototype'}
               </button>
             </form>
           </div>
@@ -120,9 +218,9 @@ export function Contact() {
               <div className="w-12 h-12 bg-accent-blue/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <div className="w-6 h-6 bg-accent-blue rounded-full" />
               </div>
-              <h4 className="font-black text-foreground mb-2">Project Discussion</h4>
+              <h4 className="font-black text-foreground mb-2">Message ‘STORE’ on Instagram</h4>
               <p className="text-muted-foreground text-sm">
-                Share your vision and requirements with our team
+                Avg. reply: &lt; 20 mins · Live storefront concept prepared within 4 hours
               </p>
             </div>
             
@@ -130,9 +228,9 @@ export function Contact() {
               <div className="w-12 h-12 bg-accent-emerald/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <div className="w-6 h-6 bg-accent-emerald rounded-full" />
               </div>
-              <h4 className="font-black text-foreground mb-2">Custom Strategy</h4>
+              <h4 className="font-black text-foreground mb-2">One-Time Setup Fee</h4>
               <p className="text-muted-foreground text-sm">
-                Get a tailored approach for your unique project
+                $0/month forever and 0% platform cut — You keep 100% of affiliate payouts
               </p>
             </div>
             
@@ -140,9 +238,9 @@ export function Contact() {
               <div className="w-12 h-12 bg-accent-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <div className="w-6 h-6 bg-accent-purple rounded-full" />
               </div>
-              <h4 className="font-black text-foreground mb-2">Next Steps</h4>
+              <h4 className="font-black text-foreground mb-2">India (₹) &amp; USA ($) Routing</h4>
               <p className="text-muted-foreground text-sm">
-                Clear timeline and roadmap to bring your idea to life
+                Built-in cross-border geo-routing with unlimited products &amp; automated link imports
               </p>
             </div>
           </div>

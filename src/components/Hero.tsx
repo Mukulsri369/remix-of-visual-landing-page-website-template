@@ -134,7 +134,9 @@ export function Hero() {
                 window.scrollTo({ top: 0, behavior: 'smooth' })
               }}
             >
-              <span className="font-bagel text-white text-xl tracking-wider">MOJJU</span>
+              <span className="font-bagel text-white text-lg sm:text-xl tracking-wider uppercase">
+                CREATE YOUR OWN AFFILIATE STORE
+              </span>
             </motion.div>
 
             {/* Navigation Menu */}
@@ -143,13 +145,13 @@ export function Hero() {
                 href="#portfolio" 
                 className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
               >
-                Work
+                Experience
               </a>
               <a 
                 href="#about" 
                 className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
               >
-                Process
+                Auto-Import
               </a>
               <a 
                 href="#services" 
@@ -161,13 +163,13 @@ export function Hero() {
                 href="#team" 
                 className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
               >
-                Team
+                Themes
               </a>
               <a 
                 href="#contact" 
                 className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
               >
-                Contact
+                Ownership
               </a>
             </div>
 
@@ -201,7 +203,7 @@ export function Hero() {
                 }}
                 className="hidden sm:block bg-red-600 backdrop-blur-sm text-white font-semibold px-6 py-3 rounded-md hover:bg-red-700 gentle-animation ml-4 cursor-pointer"
               >
-                Book a Call
+                Build My Store
               </motion.button>
 
               {/* Mobile Hamburger Menu Button */}
@@ -255,14 +257,14 @@ export function Hero() {
                 className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Work
+                Experience
               </a>
               <a 
                 href="#about" 
                 className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Process
+                Auto-Import
               </a>
               <a 
                 href="#services" 
@@ -276,14 +278,14 @@ export function Hero() {
                 className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Team
+                Themes
               </a>
               <a 
                 href="#contact" 
                 className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Contact
+                Ownership
               </a>
             </div>
 
@@ -298,7 +300,7 @@ export function Hero() {
               }}
               className="bg-red-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-700 active:bg-red-800 gentle-animation mt-8 cursor-pointer"
             >
-              Book a Call
+              Build My Store — One-Time Fee
             </motion.button>
           </div>
         </div>
@@ -313,12 +315,18 @@ export function Hero() {
         transition={{ duration: 1, delay: 1.5 }}
         className="absolute bottom-12 left-6 sm:left-8 lg:left-12 z-40"
       >
-        <div className="max-w-2xl">
+        <div className="max-w-3xl">
+          <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-white/80 mb-2">
+            Creator Storefront Engine · India & USA Geo-Routing · One-Time Ownership
+          </p>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black leading-tight text-white">
-            <span className="block">AI FILM</span>
-            <span className="block">PRODUCTION</span>
-            <span className="block">WITHOUT LIMITS</span>
+            <span className="block">ONE LINK FOR YOUR</span>
+            <span className="block">ENTIRE AFFILIATE</span>
+            <span className="block">STOREFRONT</span>
           </h1>
+          <p className="text-sm sm:text-base text-white/85 mt-3 max-w-xl leading-relaxed">
+            Turn scattered product links into a flagship shopping destination. Visitors explore your curated collections, discover complementary pieces, and check out directly on trusted global retailers.
+          </p>
         </div>
       </motion.div>
 

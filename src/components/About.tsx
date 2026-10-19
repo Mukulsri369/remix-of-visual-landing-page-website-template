@@ -10,32 +10,32 @@ export function About() {
   const processSteps = [
     {
       number: "01",
-      title: "Concept & Script",
-      description: "Scene‑by‑scene draft with dialogues and time‑codes",
+      title: "Paste Product URL",
+      description: "Supports Amazon, Nordstrom, Sephora, Flipkart, Myntra, and direct Shopify brands",
       color: "accent-blue"
     },
     {
       number: "02", 
-      title: "Look & Storyboard",
-      description: "AI engine selection and visual testing",
+      title: "Media Extraction",
+      description: "Pulls high-res studio photos, regional currency pricing, and key feature highlights",
       color: "accent-emerald"
     },
     {
       number: "03",
-      title: "AI Production",
-      description: "Motion tests and multi-variant generation",
+      title: "Smart Deduplication",
+      description: "Smart SKU matching automatically merges identical products across multiple retailers",
       color: "accent-purple"
     },
     {
       number: "04",
-      title: "Post‑production",
-      description: "VFX, color grading, and audio mixing",
+      title: "Global Geo-Routing",
+      description: "Automatic India INR (₹) & Flipkart/Myntra + USA USD ($) & Amazon/Nordstrom routing",
       color: "accent-blue"
     },
     {
       number: "05",
-      title: "Master Delivery",
-      description: "Multi-format export and secure transfer",
+      title: "Instant Publish",
+      description: "Formatted and indexed across your desktop and mobile storefront in a single click",
       color: "accent-purple"
     }
   ]
@@ -75,17 +75,17 @@ export function About() {
           <div className="inline-flex items-center gap-3 mb-6">
             <div className="w-3 h-3 bg-accent-emerald rounded-full animate-pulse" />
             <span className="text-sm font-semibold text-muted-foreground">
-              Behind the Scenes
+              Instant Link Ingestion
             </span>
             <div className="w-3 h-3 bg-accent-blue rounded-full animate-pulse" />
           </div>
           
           <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight mb-6 text-foreground">
-            How We Create Magic
+            Watch the Product Card Build Itself
           </h2>
           
           <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Watch our process unfold frame by frame
+            Skip manual data entry and image cropping. Drop any product URL and our ingestion pipeline extracts high-resolution studio imagery, live pricing, and specifications in seconds.
           </p>
         </div>
 
@@ -274,7 +274,7 @@ export function About() {
             {/* Film Speed Indicator */}
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-accent-emerald rounded-full animate-pulse" />
-              <span className="text-sm font-semibold text-foreground">24 FPS</span>
+              <span className="text-sm font-semibold text-foreground">99.9% Link Uptime</span>
             </div>
             
             <div className="w-px h-6 bg-border" />
@@ -282,7 +282,7 @@ export function About() {
             {/* Duration */}
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-accent-blue rounded-full animate-pulse" style={{animationDelay: '0.5s'}} />
-              <span className="text-sm font-semibold text-foreground">5-7 Days</span>
+              <span className="text-sm font-semibold text-foreground">&lt; 4 Hours Concept Preview</span>
             </div>
             
             <div className="w-px h-6 bg-border" />
@@ -290,7 +290,7 @@ export function About() {
             {/* Quality */}
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-accent-purple rounded-full animate-pulse" style={{animationDelay: '1s'}} />
-              <span className="text-sm font-semibold text-foreground">Cinema Quality</span>
+              <span className="text-sm font-semibold text-foreground">100% Creator-Owned</span>
             </div>
           </div>
         </div>
@@ -299,7 +299,7 @@ export function About() {
         <div className="mt-20">
           <div className="text-center mb-8">
             <p className="text-muted-foreground">
-              A glimpse into our storyboard development process
+              A glimpse into our Catalog Intelligence &amp; 1-Click Price and Stock Sync
             </p>
           </div>
           
@@ -317,7 +317,7 @@ export function About() {
               {/* Main gallery image */}
               <img 
                 src={storyboardImage}
-                alt="Collection of AI-generated video content thumbnails showcasing MOJJU's diverse output"
+                alt="Collection of curated creator storefront collections and automated product cards"
                 className="w-full h-auto rounded-xl"
                 style={{
                   filter: 'contrast(1.05) saturate(1.1) brightness(0.95)'
@@ -334,7 +334,7 @@ export function About() {
             {/* Caption */}
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground italic">
-                "Diverse scenarios, characters, and styles — all generated through our AI pipeline"
+                "Whether you curate a tight capsule of 10 essentials or manage a 3,000-item catalog, automated stock validation and duplicate guards keep your storefront fast and accurate."
               </p>
             </div>
           </div>

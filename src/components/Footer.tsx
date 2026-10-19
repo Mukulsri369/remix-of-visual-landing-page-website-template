@@ -2,17 +2,18 @@
 
 export function Footer() {
   const aiTools = [
-    'Runway Gen-4',
-    'Kling 2', 
-    'Veo 3',
-    'Higgsfield AI',
-    'Hailuo Minimax 2',
-    'Midjourney',
-    'Leonardo AI',
-    'Krea AI',
-    'Runway',
-    'Suno AI',
-    'ElevenLabs'
+    'Amazon Associates US',
+    'Amazon Associates India',
+    'Flipkart Affiliate',
+    'Myntra Luxe',
+    'Nordstrom & Saks',
+    'Sephora & Ulta',
+    'Best Buy & B&H Photo',
+    'LTK & Rakuten',
+    'CJ Affiliate',
+    'Shopify Direct Brands',
+    'INR (₹) Geo-Routing',
+    'USD ($) Geo-Routing'
   ]
 
   return (
@@ -22,18 +23,17 @@ export function Footer() {
           {/* Logo and Description */}
           <div className="col-span-12 md:col-span-4">
             <div>
-              <div className="font-bagel text-background text-3xl tracking-wider mb-4">
-                MOJJU
+              <div className="font-bagel text-background text-2xl sm:text-3xl tracking-wider mb-4 uppercase">
+                CREATE YOUR OWN AFFILIATE STORE
               </div>
               <p className="text-background/70 leading-relaxed mb-6">
-                Revolutionizing video production with intelligent AI that understands 
-                creativity, storytelling, and human emotion.
+                Turn your affiliate recommendations into a branded shopping destination with automated product ingestion, global geo-routing, and sovereign ownership.
               </p>
               {/* Social Media Icons */}
               <div className="flex items-center space-x-6">
                 {/* X (Twitter) */}
                 <a
-                  href="https://x.com/Mojjuai"
+                  href="https://x.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:scale-110 gentle-animation cursor-pointer"
@@ -45,7 +45,7 @@ export function Footer() {
 
                 {/* TikTok */}
                 <a
-                  href="https://www.tiktok.com/@mojju.ai"
+                  href="https://www.tiktok.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:scale-110 gentle-animation cursor-pointer"
@@ -57,7 +57,7 @@ export function Footer() {
 
                 {/* Instagram */}
                 <a
-                  href="https://www.instagram.com/mojju.ai"
+                  href="https://www.instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:scale-110 gentle-animation cursor-pointer"
@@ -76,7 +76,7 @@ export function Footer() {
 
                 {/* LinkedIn */}
                 <a
-                  href="https://linkedin.com/company/mojju"
+                  href="https://linkedin.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:scale-110 gentle-animation cursor-pointer"
@@ -89,19 +89,18 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Tools We Use Section */}
+          {/* Supported Networks & Capabilities Section */}
           <div className="col-span-12 md:col-span-8">
             <div>
-              <h4 className="font-black text-2xl text-background mb-4">TOOLS WE USE</h4>
+              <h4 className="font-black text-2xl text-background mb-4">SUPPORTED NETWORKS &amp; CAPABILITIES</h4>
               
-              {/* AI Tools Description */}
+              {/* Description */}
               <p className="text-background/70 text-base mb-8 leading-relaxed">
-                We leverage the latest AI technology to deliver cutting-edge video production. 
-                Our toolkit combines the best generative AI models for video, audio, and visual content creation.
+                We integrate seamlessly with global retail marketplaces and affiliate networks for automated product ingestion, real-time stock validation, and localized India (₹) &amp; USA ($) checkout routing.
               </p>
               
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {aiTools.map((tool, index) => (
+                {aiTools.map((tool) => (
                   <div
                     key={tool}
                     className="text-background/80 hover:text-background gentle-animation text-sm font-medium"
@@ -118,10 +117,10 @@ export function Footer() {
         <div className="border-t border-background/20 pt-8 mt-16">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-background/70 mb-4 md:mb-0">
-              © 2025 MOJJU. All rights reserved.
+              © 2026 Monolith Storefront · Create Your Own Affiliate Store. All rights reserved.
             </div>
             <div className="text-sm text-background/70">
-              2847 HIGHLAND AVE. SUITE 310 BIRMINGHAM 35205, AL, USA
+              ONE-TIME SETUP FEE · 100% CREATOR-OWNED AFFILIATE STOREFRONTS
             </div>
           </div>
         </div>

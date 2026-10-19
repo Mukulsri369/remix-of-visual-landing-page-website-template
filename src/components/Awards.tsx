@@ -51,17 +51,17 @@ export function Awards() {
           <div className="inline-flex items-center gap-3 mb-6">
             <div className="w-3 h-3 bg-accent-purple rounded-full animate-pulse" />
             <span className="text-sm font-semibold text-muted-foreground">
-              Recognition & Achievement
+              Sovereign Store Ownership
             </span>
             <div className="w-3 h-3 bg-accent-blue rounded-full animate-pulse" />
           </div>
           
           <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight mb-6 text-foreground">
-            Awards & Recognition
+            Own Your Storefront Forever
           </h2>
           
           <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Celebrated excellence in AI-powered film production
+            Stop paying recurring monthly SaaS subscriptions or giving up a percentage of your affiliate earnings. $0/month — Single one-time setup fee · 0% cut — You keep 100% of affiliate payouts.
           </p>
         </div>
 
