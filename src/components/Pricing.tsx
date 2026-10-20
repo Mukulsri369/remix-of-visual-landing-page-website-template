@@ -52,26 +52,21 @@ export function Pricing() {
             {PRICING_VALUE_PROPOSITIONS.secondary}
           </p>
 
-          {/* Distinct 7-Day Free Trial & Free Prototype Registration Banner */}
-          <div className="inline-flex flex-wrap items-center justify-center gap-4 p-2 rounded-2xl bg-card clean-border subtle-shadow">
+          {/* Free Prototype CTA Button + 7-Day Free Trial as Text Only */}
+          <div className="flex flex-col items-center justify-center gap-4">
             <button
               type="button"
               onClick={() => triggerOnboardingAction('free_prototype')}
-              className="px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-sm transition-colors cursor-pointer"
+              className="px-8 py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-base transition-colors shadow-lg cursor-pointer"
             >
               Register Free Prototype
             </button>
-            <button
-              type="button"
-              onClick={() => triggerOnboardingAction('free_trial_7d')}
-              className="px-6 py-3 rounded-xl bg-foreground text-background hover:opacity-90 font-bold text-sm transition-opacity cursor-pointer"
-            >
-              Start Your 7-Day Free Trial
-            </button>
+            <p className="text-sm sm:text-base font-bold text-foreground">
+              Start Your 7-Day Free Trial · Register for Your Prototype — Absolutely Free
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground mt-3">
-            <strong>Register for Your Prototype — Absolutely Free</strong> lets you preview a tailored storefront concept.{' '}
-            <strong>7-Day Free Trial</strong> lets you experience the live supported platform before choosing a one-time plan.
+          <p className="text-xs sm:text-sm text-muted-foreground mt-3 max-w-2xl mx-auto">
+            Preview a tailored storefront concept for free, or experience the supported platform with a 7-day trial before choosing your one-time ownership tier.
           </p>
         </div>
 

@@ -1,7 +1,6 @@
 'use client'
 
-import { Play, ExternalLink } from 'lucide-react'
-import { Button } from './ui/button'
+import { Sparkles } from 'lucide-react'
 
 export function Portfolio() {
   return (
@@ -26,31 +25,9 @@ export function Portfolio() {
           </p>
         </div>
 
-        {/* Featured Video */}
-        <div className="max-w-6xl mx-auto">
+        {/* Primary Showcase Card */}
+        <div className="max-w-6xl mx-auto space-y-6">
           <div className="relative bg-card clean-border rounded-3xl overflow-hidden elevated-shadow">
-            {/* Video Embed */}
-            <div className="relative">
-              <div className="aspect-video">
-                <iframe
-                  src="https://www.youtube.com/embed/fIbDWDh6aYw?rel=0&showinfo=0&modestbranding=1"
-                  title="Monolith Storefront — Live Storefront Stage"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="w-full h-full rounded-t-3xl"
-                />
-              </div>
-              
-              {/* Floating Status Badge */}
-              <div className="absolute top-6 right-6">
-                <span className="glass-effect rounded-xl px-4 py-2 text-sm font-medium text-white backdrop-blur-md">
-                  Creator Storefront Engine
-                </span>
-              </div>
-            </div>
-
-            {/* Project Details */}
             <div className="p-8 lg:p-12">
               <div className="flex-1">
                 <div className="flex items-center gap-4 mb-4">
@@ -88,6 +65,28 @@ export function Portfolio() {
                     <span className="font-medium">Verified Retailer Handoff</span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Subtle Additional Flexibility Note Below Primary Card */}
+          <div className="bg-card/40 clean-border rounded-2xl px-6 py-5 sm:px-8 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 subtle-shadow">
+            <div className="flex items-start gap-3.5">
+              <div className="w-9 h-9 rounded-xl bg-accent-blue/10 flex items-center justify-center shrink-0 mt-0.5">
+                <Sparkles className="w-4 h-4 text-accent-blue" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-accent-blue">
+                    Additional Creative Flexibility
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    · Turnkey Onboarding Included
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Our team handles the entire initial architecture, database configuration, and launch setup for you—and whenever your aesthetic evolves, your storefront stays compatible with Google AI Studio so you can freely restyle layouts and publish visual updates on your own schedule.
+                </p>
               </div>
             </div>
           </div>

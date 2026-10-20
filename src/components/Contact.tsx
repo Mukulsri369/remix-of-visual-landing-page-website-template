@@ -69,6 +69,13 @@ const SAMPLE_WEBSITES = [
     url: 'https://linea-minimalist-shopfront.lovable.app',
     accent: 'bg-accent-blue',
   },
+  {
+    id: 'sample-6',
+    badge: 'Sample 06 · Curated Storefront',
+    name: 'Our Visible Universe',
+    url: 'https://ourvisibleuniverse.store',
+    accent: 'bg-accent-purple',
+  },
 ]
 
 const COUNTRY_OPTIONS = [
@@ -404,11 +411,11 @@ export function Contact() {
           </h2>
           
           <p className="text-xl sm:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-12">
-            Preview 5 live sample websites below to experience different storefront layouts and aesthetics—then request your own tailored prototype for all countries worldwide.
+            Preview 6 live sample websites below to experience different storefront layouts and aesthetics—then request your own tailored prototype for all countries worldwide.
           </p>
 
-          {/* 5 Theme-Matched Sample Website Buttons */}
-          <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* 6 Theme-Matched Sample Website Buttons */}
+          <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {SAMPLE_WEBSITES.map((site) => (
               <a
                 key={site.id}
@@ -718,7 +725,7 @@ export function Contact() {
               <div className="w-12 h-12 bg-accent-blue/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <div className="w-6 h-6 bg-accent-blue rounded-full" />
               </div>
-              <h4 className="font-black text-foreground mb-2">5 Live Sample Websites</h4>
+              <h4 className="font-black text-foreground mb-2">6 Live Sample Websites</h4>
               <p className="text-muted-foreground text-sm">
                 Explore our live sample storefronts above or request your custom prototype below
               </p>
