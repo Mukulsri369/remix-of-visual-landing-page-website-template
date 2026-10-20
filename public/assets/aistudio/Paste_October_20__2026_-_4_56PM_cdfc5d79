@@ -1,0 +1,866 @@
+# GOOGLE AI STUDIO — REVISED SAAS PRICING IMPLEMENTATION
+## Three Plans, Database-Based Product Capacity, 24×7 Support and Premium-Only Automation
+
+You are acting as a senior SaaS architect, full-stack developer, database architect, pricing strategist, UI/UX designer and quality-assurance engineer.
+
+I have an existing affiliate-store SaaS application with a marketing website, admin dashboard, product import functionality, product management, storefront design customization, affiliate link management and other advanced capabilities.
+
+Your task is to inspect the existing application and update the pricing page, customer onboarding process, plan entitlements and necessary supporting functionality according to the following revised business model.
+
+IMPORTANT: This prompt replaces all previously proposed product-count restrictions and pricing-plan feature assignments.
+
+Do not rebuild the application from scratch.
+
+Do not remove existing functionality, damage existing customer data or replace working components with mockups.
+
+## 1. BUSINESS MODEL — NON-NEGOTIABLE REQUIREMENTS
+
+Our customers pay a one-time platform fee to obtain their own affiliate store.
+
+There is no monthly platform subscription.
+
+We provide assistance setting up an eligible free-tier database for the customer.
+
+PRODUCT CAPACITY RULE:
+
+Product capacity must NOT depend on the customer's selected pricing plan.
+
+Do not assign artificial restrictions such as:
+- Starter: 100 products
+- Creator: 1,000 products
+- Premium: 10,000 products
+
+These restrictions are no longer part of our offering.
+
+Instead, product capacity depends on the customer's selected database and infrastructure resources.
+
+A Starter customer with sufficient database capacity should be able to manage thousands of products, just like a Premium customer.
+
+Customers may select a compatible database option or use an eligible free-tier database that our team helps them configure.
+
+Database provider limits, API rate limits, storage capacity, compute resources and hosting limits still apply.
+
+Do not advertise unlimited free storage or unlimited hosting.
+
+SUPPORT RULE:
+
+All three plans include access to our 24×7 support team for technical issues and assistance with future upgrades.
+
+Premium customers may receive priority handling and advanced design consultation.
+
+Do not invent contractual response-time guarantees.
+
+Do not assume every future upgrade or redesign is free. Where changes require paid services, communicate the scope and obtain customer approval before charging.
+
+## 2. EXACT PRICING PLANS
+
+Create three beautiful pricing plans.
+
+All prices must be stored in centralized, configurable pricing data.
+
+### PLAN A — STARTER
+
+PRICE: ₹599
+PAYMENT: One time
+TAGLINE: "Your First Affiliate Store, Made Simple."
+
+Target audience:
+New influencers, beginners, small creators and people launching their first branded affiliate store.
+
+FEATURES:
+
+- One branded affiliate storefront.
+- No artificial plan-based product-count cap.
+- Product capacity determined by configured database resources.
+- Assistance setting up a compatible free-tier database.
+- Affiliate link-based automatic product importing.
+- Supported product images, title, description and price fetching.
+- Product category selection.
+- Product publishing and unpublishing.
+- Add, edit and delete products.
+- Standard administrative dashboard.
+- Storefront heading and text editing.
+- Basic product category management.
+- Exact duplicate-entry prevention.
+- Starter storefront design options.
+- Mobile-responsive storefront.
+- One selected country-specific storefront configuration.
+- Manual price and stock management.
+- 24×7 support access.
+- Assistance with future plan upgrades.
+
+EXCLUSIONS:
+
+- Intelligent suggestions for similar or duplicate products.
+- Smart catalog recommendations.
+- Advanced visual layout customization.
+- One-click bulk price refresh.
+- One-click bulk stock availability refresh.
+- Automatic out-of-stock deactivation from bulk refresh results.
+- Simultaneous India and US regional storefronts.
+- Advanced AI Studio project customization.
+
+CARD HIGHLIGHTS:
+
+"Auto-Import Affiliate Products"
+"Products Limited by Database, Not Plan"
+"Your Own Admin Dashboard"
+"24×7 Support"
+
+CTA: "Get Starter"
+
+### PLAN B — CREATOR
+
+PRICE: ₹1,499
+PAYMENT: One time
+TAGLINE: "Turn Your Influence Into a Brand."
+
+Target audience:
+Active content creators, growing affiliate pages and influencers who want intelligent product organization and a better storefront appearance.
+
+INCLUDES EVERYTHING FROM STARTER, PLUS:
+
+- Intelligent detection of possible duplicate products.
+- Existing matching-product suggestions.
+- Smart catalog and collection recommendations.
+- Intelligent product grouping suggestions.
+- More premium storefront design templates.
+- Advanced theme customization.
+- Color and typography customization.
+- Supported section layout changes.
+- Basic drag-and-drop visual editing.
+- Category and product card styling.
+- Desktop and mobile storefront previews.
+- More customization options for banners, product collections and store sections.
+- Standard design consultation.
+- 24×7 technical support.
+- Assistance with future upgrades.
+
+PRODUCT CAPACITY:
+
+No artificial plan-based product-count cap.
+
+Capacity depends on the selected database and hosting resources, exactly as with Starter and Premium.
+
+IMPORTANT EXCLUSIONS:
+
+Creator does NOT receive one-click bulk price refresh.
+
+Creator does NOT receive one-click bulk stock availability refresh.
+
+Creator does NOT receive automatic out-of-stock deactivation based on bulk refresh results.
+
+These features must be exclusive to Premium.
+
+Creator users can still manually edit product prices, stock statuses and publication settings.
+
+CREATOR CARD HIGHLIGHTS:
+
+"Smart Duplicate Detection"
+"Intelligent Catalog Suggestions"
+"Advanced Store Designs"
+"24×7 Support"
+
+CTA: "Get Creator"
+
+### PLAN C — PREMIUM
+
+PRICE: ₹3,999
+PAYMENT: One time
+TAGLINE: "Your Complete Affiliate Business Studio."
+
+This is our flagship offering and should be visually presented as the strongest option for creators who want automation and advanced creative control.
+
+TARGET AUDIENCE:
+
+Established influencers, serious affiliate marketers, professional content creators, agencies and growing businesses.
+
+INCLUDES EVERYTHING FROM STARTER AND CREATOR, PLUS:
+
+PREMIUM FEATURE 1 — ONE-CLICK PRICE REFRESH
+
+Allow the customer to refresh product pricing across the supported catalog using one dashboard action.
+
+Provide:
+- Update All Prices button.
+- Clear confirmation before execution.
+- Background job execution where appropriate.
+- Progress indicator.
+- Successfully updated product count.
+- Failed update count.
+- Last successful update timestamp.
+- Safe retry for failed items.
+- Clear error reporting.
+
+PREMIUM FEATURE 2 — ONE-CLICK STOCK AVAILABILITY REFRESH
+
+Allow customers to refresh stock availability for supported affiliate products using one dashboard action.
+
+Provide:
+- Update Stock Availability action.
+- Optional combined "Update Prices & Availability" action.
+- Background processing for large catalogs.
+- Reliable progress indication.
+- Clear results summary.
+
+PREMIUM FEATURE 3 — AUTOMATIC OUT-OF-STOCK DEACTIVATION
+
+During a successful availability refresh, detect confirmed unavailable products and automatically deactivate their public listings.
+
+Do not deactivate a product merely because its source could not be reached or its availability status is unknown.
+
+Distinguish:
+- In stock.
+- Confirmed out of stock.
+- Unknown.
+- Source temporarily unavailable.
+- Failed to refresh.
+
+Only apply automatic deactivation when supported availability data confirms that the product is unavailable.
+
+Record changes for audit and troubleshooting.
+
+PREMIUM FEATURE 4 — ADVANCED VISUAL STOREFRONT EDITOR
+
+Provide the complete available drag-and-drop customization experience.
+
+Include:
+- Storefront section positioning.
+- Supported drag-and-drop editing.
+- Product grid layout customization.
+- Category grid customization.
+- Product card dimension and shape controls.
+- Typography and spacing adjustments.
+- Banner customization.
+- Section backgrounds and styling.
+- Advanced theme controls.
+- Desktop/mobile previews.
+- Draft saving.
+- Publishing and rollback where implemented.
+
+The visual editor must accurately represent the live storefront.
+
+PREMIUM FEATURE 5 — COUNTRY-SPECIFIC STOREFRONTS
+
+Support India and US storefront experiences within the customer's store configuration.
+
+Allow country-specific product selections and regionally appropriate affiliate links.
+
+Use INR and USD where the underlying product data and store configuration support those currencies.
+
+Do not assume a currency conversion feature is already available.
+
+PREMIUM FEATURE 6 — GOOGLE AI STUDIO CUSTOMIZATION
+
+Allow the customer to make future storefront changes using a verified AI-assisted customization workflow.
+
+The workflow should support appropriately scoped changes to:
+- Store layouts.
+- Product cards.
+- Category grids.
+- Homepage sections.
+- Visual styling.
+- Typography.
+- Animations.
+- Storefront presentation.
+- Responsive design.
+- Supported new visual components.
+
+Inspect whether stores are isolated applications, separately deployed customer projects or part of a shared multi-tenant system.
+
+Implement an architecture-compatible workflow.
+
+Where technically possible, provide:
+- Exportable storefront source/project.
+- Compatible project structure.
+- Instructions for using Google AI Studio.
+- Safe development preview.
+- Version history.
+- Tested deployment process.
+- Rollback capabilities.
+
+Never expose private credentials, database secrets or another customer's data.
+
+Do not describe Google AI Studio as an official partner or imply a paid Google subscription is included.
+
+Do not claim automatic live-site editing unless it has been implemented and tested.
+
+PREMIUM FEATURE 7 — PROFESSIONAL DESIGN ASSISTANCE
+
+Provide access to our dedicated team for future design consultations and upgrade guidance.
+
+Include priority routing where the actual support workflow supports it.
+
+Show customers how to submit requests for:
+- Design adjustments.
+- New storefront themes.
+- Layout changes.
+- Additional customization.
+- Technical upgrades.
+- Troubleshooting.
+
+Clearly identify whether a requested service is included or requires a separate quotation.
+
+PREMIUM CARD HIGHLIGHTS:
+
+"One-Click Price & Stock Refresh"
+"Automatic Out-of-Stock Management"
+"Complete Visual Customization"
+"Google AI Studio-Ready"
+"India + US Storefronts"
+"24×7 Support + Priority Assistance"
+
+CTA: "Get Premium"
+
+BADGE: "BEST FOR GROWING BRANDS"
+
+## 3. DATABASE SETUP — ALL PLANS
+
+Create a dedicated website section:
+
+HEADING:
+"Your Products. Your Database. Your Freedom."
+
+SUBHEADING:
+"We help you set up an eligible free-tier database, so your store can grow according to the resources you choose."
+
+BENEFIT CARDS:
+
+1. FREE DATABASE SETUP ASSISTANCE
+
+Our team helps customers configure a compatible free-tier database.
+
+2. NO ARTIFICIAL PRODUCT LIMITS
+
+We do not restrict the number of products merely because the customer selected Starter, Creator or Premium.
+
+3. SCALE WHEN YOU NEED TO
+
+Customers can increase database capacity or migrate to a suitable paid infrastructure tier if their usage grows beyond free-tier limits.
+
+4. YOUR DATA, PROPERLY CONFIGURED
+
+Provide clear documentation on database configuration, access, backups and ownership according to the actual deployment model.
+
+IMPLEMENTATION:
+
+Inspect the current database architecture.
+
+If the application supports customer-owned isolated databases, design an assisted provisioning or connection workflow.
+
+If the application currently uses a shared multi-tenant database, do not introduce insecure customer-controlled database connections or duplicate database instances without examining the architecture.
+
+Implement the most appropriate supported approach, documenting whether the user receives:
+- Their own database project.
+- A tenant within a shared database.
+- An exportable dataset.
+- A separately hosted store.
+
+Never imply a customer controls an independent database if they do not.
+
+Where feasible, show storage usage and database health information in the admin dashboard.
+
+Do not hardcode product-count caps by plan.
+
+Make sure large product catalogs use:
+- Database pagination.
+- Efficient queries.
+- Proper indexes.
+- Lazy loading.
+- Batch processing.
+- Error handling.
+- Scalable catalog rendering.
+
+## 4. PREMIUM-ONLY REFRESH ENTITLEMENTS
+
+This is a critical implementation requirement.
+
+The premium bulk price and availability update functionality must be accessible only to customers with the Premium plan or an explicitly authorized administrative entitlement.
+
+This restriction must exist on the backend.
+
+Never rely only on hiding the frontend button.
+
+For Starter and Creator customers:
+
+Show a noninteractive preview or explanation of the Premium feature in the feature-discovery area.
+
+Example:
+
+"Update product prices and stock availability across your catalog in one click."
+
+Supporting message:
+
+"Available with Premium."
+
+CTA:
+"Explore Premium"
+
+Do not permit unauthorized API calls to execute Premium refresh jobs.
+
+For Premium customers:
+
+Show clear refresh controls within the product admin dashboard.
+
+Allow customers to update:
+- All eligible products.
+- Supported selected categories or products if existing functionality permits.
+
+Use background processing for large catalogs.
+
+Respect affiliate providers' APIs, rate limits and permitted data access methods.
+
+Do not claim every affiliate website supports automatic price or stock extraction.
+
+Do not create false stock information when a fetch fails.
+
+Avoid executing duplicate refresh jobs simultaneously.
+
+Protect the application from excessive database writes and uncontrolled API usage.
+
+## 5. 24×7 SUPPORT — ALL PLANS
+
+Create a dedicated support section on the pricing page.
+
+HEADING:
+"Your Store Is Yours. You're Never Alone."
+
+SUBHEADING:
+"Get access to our 24×7 support team for technical issues, store guidance and future upgrade assistance."
+
+Show three support areas:
+
+TECHNICAL SUPPORT
+Help with supported store functionality, errors and troubleshooting.
+
+DESIGN SUPPORT
+Assistance with supported visual changes and storefront customization questions.
+
+FUTURE UPGRADES
+Guidance on moving to higher plans and requesting additional capabilities or professional changes.
+
+All three plans must display:
+
+"24×7 Support Included"
+
+Provide an actual support contact mechanism.
+
+Inspect existing support tools and integrations.
+
+Use the existing supported support channel, such as helpdesk, email-based ticketing or integrated messaging.
+
+Do not invent phone numbers, email addresses, WhatsApp numbers, ticket identifiers or staffed live-chat functionality.
+
+If 24×7 live human availability has not been operationally verified, flag this as a business-launch requirement rather than misrepresenting support.
+
+Support requests must be securely associated with the correct customer and storefront.
+
+Maintain request status and communication history where supported.
+
+Premium can have a priority classification without inventing guaranteed resolution times.
+
+Future paid upgrades and redesign projects should require an approved scope and quotation when applicable.
+
+## 6. REDESIGN THE PRICING PAGE
+
+Create a visually impressive, modern, premium SaaS pricing page.
+
+Use the existing website branding and design system.
+
+DESKTOP:
+
+Three pricing cards in one row.
+
+Starter: ₹599.
+Creator: ₹1,499.
+Premium: ₹3,999.
+
+All prices clearly labeled:
+
+"ONE-TIME PAYMENT"
+
+Immediately below the pricing cards display:
+
+"No Monthly Platform Subscription"
+
+"No Artificial Plan-Based Product Limits"
+
+"Free Database Setup Assistance"
+
+"24×7 Support"
+
+PREMIUM VISUAL POSITIONING:
+
+Make Premium the strongest visual option.
+
+Use:
+- Elegant cobalt-blue/violet accent border.
+- Tasteful depth and lighting.
+- Slight elevation.
+- Clear feature hierarchy.
+- More prominent CTA.
+- A grounded recommendation badge.
+
+Avoid deceptive visual tricks that obscure lower-priced plans.
+
+PRIMARY VALUE PROPOSITION:
+
+"Pay Once. Own Your Affiliate Store."
+
+SECONDARY VALUE PROPOSITION:
+
+"From your first product to thousands, your database determines capacity—not your pricing plan."
+
+### STARTER CARD
+
+Headline:
+"Launch Your First Affiliate Store"
+
+Description:
+"Start recommending products through your own branded storefront with easy affiliate imports and complete essential controls."
+
+Show:
+- Affiliate link importing.
+- Database-based product capacity.
+- Free database setup assistance.
+- Product admin dashboard.
+- Responsive starter design.
+- 24×7 support.
+
+### CREATOR CARD
+
+Headline:
+"Build a Brand Around Your Recommendations"
+
+Description:
+"Take your storefront further with intelligent duplicate suggestions, smarter catalogs and advanced visual customization."
+
+Show:
+- Everything in Starter.
+- Smart duplicate suggestions.
+- Intelligent catalog recommendations.
+- Enhanced themes.
+- Visual layout controls.
+- 24×7 support.
+
+### PREMIUM CARD
+
+Headline:
+"Your Store. Fully Powered."
+
+Description:
+"Run a more advanced affiliate storefront with one-click price and stock updates, premium customization, multi-country support and AI-assisted future changes."
+
+Show:
+- Everything in Creator.
+- One-click price and stock refresh.
+- Automatic out-of-stock deactivation.
+- Advanced visual editor.
+- India + US storefronts.
+- Google AI Studio customization.
+- Priority design assistance.
+
+## 7. COMPREHENSIVE FEATURE COMPARISON
+
+Build a comparison table containing:
+
+- One-time payment.
+- Free-tier database setup assistance.
+- Database-dependent product capacity.
+- Automatic affiliate product import.
+- Product management.
+- Category management.
+- Storefront text editing.
+- Basic duplicate prevention.
+- Smart duplicate suggestions.
+- Smart catalog recommendations.
+- Design templates.
+- Visual drag-and-drop editing.
+- Product and category grid customization.
+- Manual product price/stock edits.
+- One-click bulk price refresh.
+- One-click bulk availability refresh.
+- Automatic out-of-stock deactivation.
+- Country-specific storefronts.
+- Google AI Studio customization.
+- 24×7 support.
+- Future upgrade assistance.
+- Professional redesign consultation.
+
+Ensure the comparison matches backend entitlements.
+
+Do not show any plan-based numerical product limit.
+
+## 8. 7-DAY FREE TRIAL AND FREE PROTOTYPE REGISTRATION
+
+Keep the previously established offers:
+
+"7-Day Free Trial"
+
+"Register for Your Prototype — Absolutely Free"
+
+These are distinct.
+
+The free prototype is an opportunity to explore a potential storefront design or prototype workflow.
+
+The trial is a time-limited opportunity to experience the actual supported product.
+
+Inspect the existing trial and registration implementation.
+
+Preserve functioning workflows.
+
+Do not promise access to Premium bulk refresh during the trial unless the trial entitlement policy explicitly permits it and the related data costs are controlled.
+
+If trial entitlements are not defined, make them configurable and flag the policy for business approval.
+
+Add clear CTAs:
+
+"Start Your 7-Day Free Trial"
+
+"Register for Free Prototype"
+
+Do not imply that the full permanent store is free.
+
+Do not silently activate recurring billing.
+
+## 9. UPDATE THE ADMIN DASHBOARD
+
+Add or improve a "My Plan" section showing:
+
+- Current plan.
+- One-time payment status.
+- Available capabilities.
+- Database connection status.
+- Database usage information where available.
+- Support access.
+- Upgrade options.
+- Trial status when applicable.
+
+PRODUCT MANAGEMENT:
+
+Starter:
+Manual product management and affiliate importing.
+
+Creator:
+Manual product management plus smart catalog and duplicate suggestions.
+
+Premium:
+All product management tools plus the exclusive bulk refresh dashboard.
+
+PREMIUM REFRESH UI:
+
+Build an excellent interface displaying:
+- Update Prices button.
+- Update Availability button.
+- Update Prices & Availability button.
+- Number of eligible products.
+- Current processing status.
+- Successful updates.
+- Failed updates.
+- Confirmed unavailable products.
+- Products automatically deactivated.
+- Last completed refresh time.
+
+Use genuine backend execution and real results.
+
+Do not fabricate successful refresh statistics.
+
+Ensure the process is responsive, resilient and can handle large product catalogs using appropriate batching.
+
+## 10. PAYMENT, UPGRADES AND OWNERSHIP
+
+Use the application's existing secure payment integration where available.
+
+Every plan is a one-time purchase.
+
+Do not create monthly subscription billing.
+
+Customers must be able to upgrade from:
+- Starter to Creator.
+- Starter to Premium.
+- Creator to Premium.
+
+Preserve:
+- Existing product data.
+- Database connections.
+- Categories.
+- Storefront configuration.
+- Affiliate URLs.
+- Customer account and identity.
+
+Do not reset or delete a store during a plan upgrade.
+
+Implement purchase-price credit only if an approved upgrade policy exists.
+
+Do not assume upgrades always cost only the difference between plan prices.
+
+Make the ownership terms and external-service costs easy to understand.
+
+A one-time platform fee does not automatically mean that every third-party service is permanently free.
+
+## 11. TECHNICAL IMPLEMENTATION REQUIREMENTS
+
+Before changing code:
+
+Inspect the existing architecture.
+
+Determine:
+- Frontend framework.
+- Backend framework.
+- Database system.
+- Authentication method.
+- Store tenancy model.
+- Product data fetching system.
+- Price/stock update mechanism.
+- Admin panel architecture.
+- Payment processing.
+- Support integrations.
+- Existing design editor.
+- Existing deployment infrastructure.
+
+Create a centralized plan entitlement model.
+
+Do not scatter hardcoded plan checks across unrelated components.
+
+Represent product count limits as database/infrastructure capacity concerns, not pricing entitlements.
+
+Enforce Premium refresh access in trusted backend code.
+
+Preserve tenant isolation and existing authorization logic.
+
+Create migrations only where needed.
+
+Ensure migrations are safe for existing customers.
+
+Do not silently remove capabilities from current paying users.
+
+Provide a clear compatibility or grandfathering policy when migrating existing accounts.
+
+Use appropriate loading, failure, empty and permission states.
+
+## 12. RESPONSIVE UI AND DESIGN QUALITY
+
+The pricing page must work beautifully on:
+- Desktop.
+- Tablet.
+- Mobile.
+
+Use premium typography, cohesive colors, refined motion and readable features.
+
+Create strong visual separation between the three plans.
+
+Make Premium appear most capable and desirable without misleading users.
+
+Use a mobile-friendly comparison experience.
+
+Avoid cluttered feature lists inside narrow cards.
+
+Keep the strongest benefits visible immediately.
+
+Ensure buttons are connected to real supported workflows.
+
+Do not invent contact links or payment destinations.
+
+## 13. VALIDATION AND TESTING
+
+Perform complete validation before claiming the implementation is production-ready.
+
+Verify:
+
+DATABASE:
+- Starter can add products beyond the previously suggested 100-product limit, subject to actual database capacity.
+- Creator is not artificially restricted to 1,000 products.
+- Premium is not artificially restricted to 10,000 products.
+- Database usage and provider limits are respected.
+- Tenant data is securely isolated.
+- Database connection failures are handled safely.
+
+ENTITLEMENTS:
+- Starter features work.
+- Creator smart duplicate and catalog functions work.
+- Premium refresh controls work.
+- Non-Premium customers cannot execute Premium refresh actions through direct API requests.
+- Backend entitlements agree with pricing descriptions.
+
+REFRESH:
+- Bulk jobs can process the supported catalog.
+- Partial failures are reported.
+- Provider rate limits are respected.
+- Unknown availability does not cause false deactivation.
+- Confirmed out-of-stock items deactivate correctly.
+- Repeated clicks cannot create uncontrolled duplicate jobs.
+
+SUPPORT:
+- All customers can access the support workflow.
+- Support requests are routed to the correct account.
+- Upgrade assistance can be requested.
+- Premium priority support is only advertised if implemented.
+
+PAYMENT:
+- One-time payment processing works.
+- Plan assignment is correct.
+- Upgrades preserve data.
+- Existing customers retain approved entitlements.
+
+TRIAL:
+- Seven-day trial timing is correct.
+- Trial and prototype registration remain distinct.
+- Trial expiry is handled safely.
+
+UI:
+- All three cards display correct prices.
+- No outdated product-count limits remain.
+- Feature comparisons match actual capabilities.
+- Mobile layouts are correct.
+- Every CTA works.
+- Page performance remains acceptable.
+- Existing site features do not regress.
+
+## 14. FINAL REPORT
+
+After implementation, provide a detailed report including:
+
+1. Existing architecture inspected.
+2. Files modified.
+3. Pricing plans implemented.
+4. Database configuration approach.
+5. Removed product-count restrictions.
+6. Premium-only refresh controls implemented.
+7. 24×7 support integration status.
+8. AI Studio customization integration status.
+9. Payment and upgrade integration status.
+10. Free trial and prototype workflow status.
+11. Tests performed.
+12. Any remaining limitations.
+13. Business policies that require confirmation.
+14. Production readiness assessment.
+
+Do not claim production readiness unless critical features have been tested.
+
+Do not use mock data to represent real customer records or working payment operations.
+
+## FINAL OBJECTIVE
+
+Create a beautiful and commercially compelling affiliate-store pricing experience based on three plans:
+
+STARTER — ₹599
+Create your affiliate store and manage your products.
+
+CREATOR — ₹1,499
+Get smarter catalogs, duplicate suggestions and advanced designs.
+
+PREMIUM — ₹3,999
+Unlock one-click bulk price and stock updates, automatic out-of-stock management, advanced creative customization, India and US storefronts and AI Studio-assisted changes.
+
+ALL THREE PLANS:
+- One-time platform payment.
+- No monthly platform subscription.
+- No artificial product-count restrictions.
+- Database capacity based on the chosen infrastructure.
+- Free-tier database setup assistance.
+- 24×7 support access.
+- Future upgrade assistance.
+
+Make Premium the most attractive choice for serious influencers, while ensuring Starter and Creator remain valuable, usable products.
+
+Preserve every existing working feature, keep implementation secure and maintain production-quality design throughout.

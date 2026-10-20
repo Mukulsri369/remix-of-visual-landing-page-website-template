@@ -174,6 +174,12 @@ export function Hero() {
                 Themes
               </a>
               <a 
+                href="#pricing" 
+                className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
+              >
+                Pricing
+              </a>
+              <a 
                 href="#contact" 
                 className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
               >
@@ -181,7 +187,7 @@ export function Hero() {
               </a>
             </div>
 
-            {/* Right Side - Video Controls + CTA + Mobile Menu */}
+            {/* Right Side - Video Controls + Mobile Menu */}
             <div className="flex items-center space-x-3 relative">
               {/* Video Controls with Sound On indicator */}
               <div className="relative">
@@ -200,19 +206,6 @@ export function Hero() {
                   </div>
                 )}
               </div>
-              
-              {/* CTA Button - Hidden on mobile */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  const contactSection = document.getElementById('contact')
-                  contactSection?.scrollIntoView({ behavior: 'smooth' })
-                }}
-                className="hidden sm:block bg-red-600 backdrop-blur-sm text-white font-semibold px-6 py-3 rounded-md hover:bg-red-700 gentle-animation ml-4 cursor-pointer"
-              >
-                Build My Store
-              </motion.button>
 
               {/* Mobile Hamburger Menu Button */}
               <button
@@ -289,6 +282,13 @@ export function Hero() {
                 Themes
               </a>
               <a 
+                href="#pricing" 
+                className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Pricing
+              </a>
+              <a 
                 href="#contact" 
                 className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -302,43 +302,57 @@ export function Hero() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
+                window.dispatchEvent(new CustomEvent('select-onboarding-intent', { detail: 'free_prototype' }))
                 const contactSection = document.getElementById('contact')
                 contactSection?.scrollIntoView({ behavior: 'smooth' })
                 setIsMobileMenuOpen(false)
               }}
               className="bg-red-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-700 active:bg-red-800 gentle-animation mt-8 cursor-pointer"
             >
-              Build My Store — One-Time Fee
+              Register Free Prototype
             </motion.button>
           </div>
         </div>
       </motion.div>
-
-
 
       {/* Big Studio Title - Lower Left */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 1, delay: 1.5 }}
-        className="absolute bottom-12 left-6 sm:left-8 lg:left-12 z-40"
+        className="absolute bottom-8 left-6 sm:left-8 lg:left-12 z-30 pointer-events-none"
       >
-        <div className="max-w-3xl">
-          <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-white/80 mb-2">
-            Creator Storefront Engine · Global Multi-Country Geo-Routing · One-Time Ownership
-          </p>
+        <div className="max-w-2xl">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black leading-tight text-white">
             <span className="block">ONE LINK FOR YOUR</span>
             <span className="block">ENTIRE AFFILIATE</span>
             <span className="block">STOREFRONT</span>
           </h1>
-          <p className="text-sm sm:text-base text-white/85 mt-3 max-w-xl leading-relaxed">
-            Turn scattered product links into a flagship shopping destination for visitors in every country. Automatically route shoppers to localized currencies and retailers worldwide—and easily add more countries anytime later.
-          </p>
         </div>
       </motion.div>
 
-
+      {/* Center Main Screen CTA Button - Clean & Unobstructed */}
+      <div className="absolute inset-x-0 top-[44%] -translate-y-1/2 flex items-center justify-center z-50 pointer-events-none px-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.9 }}
+          className="pointer-events-auto flex flex-col items-center text-center"
+        >
+          <motion.button
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('select-onboarding-intent', { detail: 'free_prototype' }))
+              const contactSection = document.getElementById('contact')
+              contactSection?.scrollIntoView({ behavior: 'smooth' })
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white font-black text-base sm:text-lg md:text-xl px-8 sm:px-10 py-4 sm:py-5 rounded-xl shadow-[0_20px_50px_rgba(220,38,38,0.5)] border border-white/20 backdrop-blur-md gentle-animation cursor-pointer tracking-wide"
+          >
+            Register Free Prototype
+          </motion.button>
+        </motion.div>
+      </div>
     </div>
   )
 }

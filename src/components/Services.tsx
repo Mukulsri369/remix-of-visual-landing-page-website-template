@@ -43,7 +43,7 @@ export function Services() {
     {
       id: 'animation',
       title: "Catalog Intelligence",
-      description: "Edge indexing and smart SKU duplicate guards keep search and filtering instantaneous from 10 essentials up to 10,000+ SKUs.",
+      description: "Indexed database pagination and smart duplicate guards keep search and filtering instantaneous—with product capacity determined by your database resources, never restricted by your plan.",
       color: 'accent-blue',
       rotation: 'rotate-3',
       image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&h=300&fit=crop&auto=format'

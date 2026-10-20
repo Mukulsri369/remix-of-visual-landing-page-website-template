@@ -20,7 +20,18 @@ import {
   getRememberedSession,
   saveRememberedSession,
   AppAccountSession,
+  handleFirestoreError,
+  OperationType,
 } from '@/lib/firebase'
+import { OnboardingIntent } from '@/lib/pricing'
+
+const ONBOARDING_INTENT_LABELS: Record<OnboardingIntent, string> = {
+  free_prototype: 'Register for Your Prototype — Absolutely Free',
+  free_trial_7d: 'Start Your 7-Day Free Trial',
+  starter: 'Starter Plan — ₹599 (One-Time Payment)',
+  creator: 'Creator Plan — ₹1,499 (One-Time Payment)',
+  premium: 'Premium Plan — ₹3,999 (One-Time Payment · Best for Growing Brands)',
+}
 
 const SAMPLE_WEBSITES = [
   {
@@ -87,6 +98,7 @@ export function Contact() {
   const [pendingSubmitAfterAuth, setPendingSubmitAfterAuth] = useState(false)
 
   const [formData, setFormData] = useState({
+    onboardingIntent: 'free_prototype' as OnboardingIntent,
     name: '',
     handle: '',
     niche: 'Fashion & Luxury Apparel',
@@ -97,6 +109,21 @@ export function Contact() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+
+  // Listen for CTA selections from Hero or Pricing sections
+  useEffect(() => {
+    const handleSelectIntent = (e: Event) => {
+      const customEvent = e as CustomEvent<OnboardingIntent>
+      if (customEvent.detail && ONBOARDING_INTENT_LABELS[customEvent.detail]) {
+        setFormData((prev) => ({
+          ...prev,
+          onboardingIntent: customEvent.detail,
+        }))
+      }
+    }
+    window.addEventListener('select-onboarding-intent', handleSelectIntent)
+    return () => window.removeEventListener('select-onboarding-intent', handleSelectIntent)
+  }, [])
 
   // Sync remembered session or Firebase Auth state on load
   useEffect(() => {
@@ -166,12 +193,18 @@ export function Contact() {
       .join(', ')
       .slice(0, 500)
 
+    const selectedIntentLabel = ONBOARDING_INTENT_LABELS[formData.onboardingIntent]
+    const enrichedDescription = `[Selected Option: ${selectedIntentLabel}] ${
+      finalStoreDescription || 'Standard Monolith Storefront setup'
+    }`.slice(0, 1500)
+
     setIsSubmitting(true)
 
     try {
       // 1. Save to Firestore if signed in with a verified Firebase token
       if (auth.currentUser && auth.currentUser.emailVerified) {
         const requestId = `req_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`
+        const writePath = `prototype_requests/${requestId}`
         try {
           await setDoc(doc(db, 'prototype_requests', requestId), {
             uid: auth.currentUser.uid,
@@ -181,10 +214,14 @@ export function Contact() {
             niche: formData.niche.slice(0, 100),
             theme: formData.theme.slice(0, 100),
             regions: combinedRegions,
-            storeDescription: finalStoreDescription || 'Standard Monolith Storefront setup',
+            storeDescription: enrichedDescription,
             createdAt: serverTimestamp(),
           })
         } catch (firestoreErr) {
+          const errMsg = firestoreErr instanceof Error ? firestoreErr.message : String(firestoreErr)
+          if (errMsg.includes('Missing or insufficient permissions')) {
+            handleFirestoreError(firestoreErr, OperationType.CREATE, writePath)
+          }
           console.warn('Firestore write skipped or restricted:', firestoreErr)
         }
       }
@@ -198,8 +235,9 @@ export function Contact() {
             Accept: 'application/json',
           },
           body: JSON.stringify({
-            _subject: `New Storefront Prototype Request — ${finalName} (${finalHandle})`,
+            _subject: `New Storefront Request (${selectedIntentLabel}) — ${finalName} (${finalHandle})`,
             _template: 'table',
+            'Registration / Selected Plan': selectedIntentLabel,
             'Creator Full Name': finalName,
             'Registered User Email': activeSession.email,
             'Social Handle / URL': finalHandle,
@@ -208,7 +246,8 @@ export function Contact() {
             'Target Audience Countries': combinedRegions,
             'Store Looks & Features Description':
               finalStoreDescription || 'No additional custom description provided',
-            'Note on Countries': 'Creator can also add additional countries later',
+            'Database & Support Policy':
+              'Database-dependent product capacity (no artificial plan cap) + Free database setup assistance + 24×7 Support included',
           }),
         })
       } catch (emailErr) {
@@ -487,6 +526,40 @@ export function Contact() {
             </div>
             
             <form onSubmit={handleFormSubmit} className="p-8 space-y-6">
+              {/* Registration / Plan Selection */}
+              <div>
+                <label htmlFor="intake-intent" className="block text-sm font-semibold text-foreground mb-2">
+                  Selected Registration / One-Time Plan Option
+                </label>
+                <select
+                  id="intake-intent"
+                  value={formData.onboardingIntent}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      onboardingIntent: e.target.value as OnboardingIntent,
+                    }))
+                  }
+                  className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground font-semibold focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
+                >
+                  <option value="free_prototype">
+                    Register for Your Prototype — Absolutely Free
+                  </option>
+                  <option value="free_trial_7d">
+                    Start Your 7-Day Free Trial (Experience Live Platform)
+                  </option>
+                  <option value="starter">
+                    Starter Plan — ₹599 One-Time Payment (24×7 Support + Free DB Setup)
+                  </option>
+                  <option value="creator">
+                    Creator Plan — ₹1,499 One-Time Payment (Smart Catalog + Advanced Themes)
+                  </option>
+                  <option value="premium">
+                    Premium Plan — ₹3,999 One-Time Payment (1-Click Refresh + India &amp; US + AI Studio)
+                  </option>
+                </select>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="intake-name" className="block text-sm font-semibold text-foreground mb-2">
@@ -629,10 +702,10 @@ export function Contact() {
                 className="w-full py-4 rounded-xl bg-foreground text-background font-black text-lg hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting
-                  ? 'Submitting Request...'
+                  ? 'Submitting Registration...'
                   : !account
-                  ? 'Sign Up / Sign In & Request Storefront Prototype'
-                  : 'Request Storefront Prototype'}
+                  ? 'Sign Up / Sign In & Register Free Prototype'
+                  : 'Register Free Prototype'}
               </button>
             </form>
           </div>

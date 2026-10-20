@@ -334,7 +334,7 @@ export function About() {
             {/* Caption */}
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground italic">
-                "Whether you curate a tight capsule of 10 essentials or manage a 3,000-item catalog, automated stock validation and duplicate guards keep your storefront fast and accurate."
+                "From your first product to thousands, your database determines your catalog capacity—not your pricing plan—with free-tier database setup assistance and 24×7 support included."
               </p>
             </div>
           </div>
