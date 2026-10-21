@@ -302,19 +302,19 @@ export function Pricing() {
                     <th className="py-5 px-4 text-center text-sm font-black text-foreground w-1/5">
                       Starter
                       <span className="block text-xs font-bold text-muted-foreground mt-0.5">
-                        ₹599 One-Time
+                        ₹3,999 One-Time
                       </span>
                     </th>
                     <th className="py-5 px-4 text-center text-sm font-black text-foreground w-1/5">
                       Creator
                       <span className="block text-xs font-bold text-muted-foreground mt-0.5">
-                        ₹1,499 One-Time
+                        ₹4,999 One-Time
                       </span>
                     </th>
                     <th className="py-5 px-4 text-center text-sm font-black text-accent-blue bg-accent-blue/5 w-1/5">
                       Premium
                       <span className="block text-xs font-bold text-accent-blue mt-0.5">
-                        ₹3,999 One-Time
+                        ₹5,999 One-Time
                       </span>
                     </th>
                   </tr>

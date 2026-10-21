@@ -11,15 +11,15 @@ export function Services() {
     {
       id: 'campaigns',
       title: "Instant Link Ingestion",
-      description: "Drop any product URL and our ingestion pipeline extracts high-resolution studio imagery, live pricing, and specifications in seconds.",
+      description: "Paste any affiliate link and our ingestion pipeline automatically fetches high-resolution imagery, live pricing, and product details—formatted and ready to publish in seconds.",
       color: 'accent-emerald',
       rotation: 'rotate-2',
       image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&auto=format'
     },
     {
       id: 'brand-films',
-      title: "Cross-Border Geo Routing", 
-      description: "Build storefronts for audiences in any country worldwide—automatically localizing currencies and retail links (US, UK, India, EU, Canada, Australia, UAE & more) with the flexibility to add new countries anytime later.",
+      title: "Country-Specific Storefronts", 
+      description: "Add and manage dedicated country-specific storefronts across all plans—automatically localizing currencies and regional retail links with the flexibility to expand to new markets anytime.",
       color: 'accent-blue',
       rotation: '-rotate-1',
       image: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=300&fit=crop&auto=format'

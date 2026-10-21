@@ -28,9 +28,9 @@ import { OnboardingIntent } from '@/lib/pricing'
 const ONBOARDING_INTENT_LABELS: Record<OnboardingIntent, string> = {
   free_prototype: 'Register for Your Prototype — Absolutely Free',
   free_trial_7d: 'Start Your 7-Day Free Trial',
-  starter: 'Starter Plan — ₹599 (One-Time Payment)',
-  creator: 'Creator Plan — ₹1,499 (One-Time Payment)',
-  premium: 'Premium Plan — ₹3,999 (One-Time Payment · Best for Growing Brands)',
+  starter: 'Starter Plan — ₹3,999 (One-Time Payment)',
+  creator: 'Creator Plan — ₹4,999 (One-Time Payment)',
+  premium: 'Premium Plan — ₹5,999 (One-Time Payment · Best for Growing Brands)',
 }
 
 const SAMPLE_WEBSITES = [
@@ -556,13 +556,13 @@ export function Contact() {
                     Start Your 7-Day Free Trial (Experience Live Platform)
                   </option>
                   <option value="starter">
-                    Starter Plan — ₹599 One-Time Payment (24×7 Support + Free DB Setup)
+                    Starter Plan — ₹3,999 One-Time Payment (Auto-Fetch Links + Country Storefronts + Free DB Setup)
                   </option>
                   <option value="creator">
-                    Creator Plan — ₹1,499 One-Time Payment (Smart Catalog + Advanced Themes)
+                    Creator Plan — ₹4,999 One-Time Payment (Smart Catalog + Country Storefronts + Advanced Themes)
                   </option>
                   <option value="premium">
-                    Premium Plan — ₹3,999 One-Time Payment (1-Click Refresh + India &amp; US + AI Studio)
+                    Premium Plan — ₹5,999 One-Time Payment (1-Click Refresh + Visual Editor + Priority Support)
                   </option>
                 </select>
               </div>

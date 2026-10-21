@@ -21,45 +21,53 @@ export function Hero() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Ensure video is muted immediately on load to prevent any audio
+  // Ensure video is muted immediately on load and handle browser power-saving pauses gracefully
   useEffect(() => {
-    if (videoRef.current) {
-      console.log('Video element found, setting up...')
-      videoRef.current.volume = 0
-      videoRef.current.muted = true
-      videoRef.current.defaultMuted = true
-      
-      // Add event listeners for debugging
-      videoRef.current.addEventListener('loadstart', () => console.log('Video: loadstart'))
-      videoRef.current.addEventListener('loadedmetadata', () => console.log('Video: loadedmetadata'))
-      videoRef.current.addEventListener('canplay', () => console.log('Video: canplay'))
-      videoRef.current.addEventListener('playing', () => console.log('Video: playing'))
-      videoRef.current.addEventListener('error', (e) => console.error('Video error:', e))
-      
-      // Force mute on play
-      videoRef.current.addEventListener('play', () => {
-        if (videoRef.current) {
-          console.log('Video play event fired')
-          videoRef.current.muted = isMuted
-          videoRef.current.volume = isMuted ? 0 : 0.7
-        }
-      })
+    const videoEl = videoRef.current
+    if (!videoEl) return
 
-      // Ensure video loops cleanly before the 51.5s mark
-      videoRef.current.addEventListener('timeupdate', () => {
-        if (videoRef.current && videoRef.current.currentTime >= 51.4) {
-          videoRef.current.currentTime = 0
-          videoRef.current.play().catch(() => {})
-        }
-      })
-      
-      // Try to play the video
-      const playPromise = videoRef.current.play()
+    videoEl.volume = 0
+    videoEl.muted = true
+    videoEl.defaultMuted = true
+
+    const safePlay = () => {
+      if (!videoEl || document.hidden) return
+      const playPromise = videoEl.play()
       if (playPromise !== undefined) {
-        playPromise
-          .then(() => console.log('Video autoplay successful'))
-          .catch(error => console.error('Video autoplay failed:', error))
+        playPromise.catch(() => {
+          // Browsers may pause background video-only media to save power; ignore benign AbortError
+        })
       }
+    }
+
+    const handlePlay = () => {
+      videoEl.muted = isMuted
+      videoEl.volume = isMuted ? 0 : 0.7
+    }
+
+    const handleTimeUpdate = () => {
+      if (videoEl.currentTime >= 51.4) {
+        videoEl.currentTime = 0
+        safePlay()
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden && videoEl.paused) {
+        safePlay()
+      }
+    }
+
+    videoEl.addEventListener('play', handlePlay)
+    videoEl.addEventListener('timeupdate', handleTimeUpdate)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    safePlay()
+
+    return () => {
+      videoEl.removeEventListener('play', handlePlay)
+      videoEl.removeEventListener('timeupdate', handleTimeUpdate)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
