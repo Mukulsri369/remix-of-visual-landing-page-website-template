@@ -196,7 +196,7 @@ export function Hero() {
       </header>
       <div className="film-experience" ref={stage} id="portfolio">
         <div className="film-narrative">
-          {films.map((film, index) => <article key={film.id} ref={el => { chapters.current[index] = el }} className="film-chapter" id={`chapter-${film.id}`}>
+          {films.map((film, index) => <article key={film.id} ref={el => { chapters.current[index] = el }} className={`film-chapter ${active === index ? 'is-current' : ''}`} id={`chapter-${film.id}`}>
             <div className="chapter-copy">
               {index === 0 ? <h1>{film.title}</h1> : <h2>{film.title}</h2>}
               <p>{film.description}</p>

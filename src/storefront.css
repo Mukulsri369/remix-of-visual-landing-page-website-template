@@ -332,3 +332,8 @@ html { scroll-behavior: auto; }
 .contact-loading h2 { max-width: 12ch; font-size: clamp(38px,4.7vw,68px); }
 .contact-loading p { margin-top: 28px; color: var(--page-soft); }
 .film-layer { contain: layout paint; }
+
+@media (max-width: 700px) {
+  /* Incoming chapter copy must not cross the sticky film before activation. */
+  .film-chapter:not(.is-current) .chapter-copy { visibility: hidden; }
+}
