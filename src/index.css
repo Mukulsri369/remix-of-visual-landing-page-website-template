@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bagel+Fat+One&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -102,7 +102,7 @@
   }
 
   body {
-    @apply bg-background text-foreground overflow-x-hidden;
+    @apply bg-background text-foreground overflow-x-clip;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     width: 100%;
     max-width: 100vw;
@@ -115,7 +115,7 @@
   /* Ensure no elements can cause horizontal overflow */
   .container {
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   
   /* Font utility classes */
@@ -467,7 +467,7 @@ html {
 /* Mobile optimizations for video */
 @media (max-width: 768px) {
   html, body {
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
     width: 100%;
     max-width: 100vw;
   }
@@ -494,7 +494,7 @@ html {
   
   /* Prevent horizontal scroll when mobile menu is open */
   body.mobile-menu-open {
-    overflow-x: hidden;
+    overflow-x: clip;
     position: fixed;
     width: 100%;
   }
@@ -508,7 +508,7 @@ html {
   /* Force all sections to stay within viewport */
   section {
     max-width: 100vw;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   
   /* Ensure containers don't exceed viewport */

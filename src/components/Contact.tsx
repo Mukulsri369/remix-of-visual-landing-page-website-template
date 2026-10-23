@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { CheckCircle2, ExternalLink, Globe, LogIn, LogOut, ShieldCheck, UserPlus, Sparkles } from 'lucide-react'
+import { ArrowRight, ArrowLeft, ArrowUpRight, Check, CheckCircle2, Eye, EyeOff, Loader2, LogOut } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import {
   Dialog,
@@ -103,6 +103,22 @@ export function Contact() {
   const [authError, setAuthError] = useState('')
   const [isAuthBusy, setIsAuthBusy] = useState(false)
   const [pendingSubmitAfterAuth, setPendingSubmitAfterAuth] = useState(false)
+  const [briefStep, setBriefStep] = useState(0)
+  const [showPassword, setShowPassword] = useState(false)
+  const [profileError, setProfileError] = useState('')
+  const openAuth = (mode: 'signup' | 'signin') => {
+    setAuthMode(mode)
+    setAuthError('')
+    setShowPassword(false)
+    setPendingSubmitAfterAuth(false)
+    setShowAuthModal(true)
+  }
+  const switchAuth = () => {
+    setAuthMode(previous => previous === 'signup' ? 'signin' : 'signup')
+    setAuthError('')
+    setShowPassword(false)
+  }
+
 
   const [formData, setFormData] = useState({
     onboardingIntent: 'free_prototype' as OnboardingIntent,
@@ -206,6 +222,7 @@ export function Contact() {
     }`.slice(0, 1500)
 
     setIsSubmitting(true)
+    let delivered = false
 
     try {
       // 1. Save to Firestore if signed in with a verified Firebase token
@@ -224,6 +241,7 @@ export function Contact() {
             storeDescription: enrichedDescription,
             createdAt: serverTimestamp(),
           })
+          delivered = true
         } catch (firestoreErr) {
           const errMsg = firestoreErr instanceof Error ? firestoreErr.message : String(firestoreErr)
           if (errMsg.includes('Missing or insufficient permissions')) {
@@ -235,7 +253,7 @@ export function Contact() {
 
       // 2. Send email notification to mukul.srivastava.025@gmail.com
       try {
-        await fetch('https://formsubmit.co/ajax/mukul.srivastava.025@gmail.com', {
+        const response = await fetch('https://formsubmit.co/ajax/mukul.srivastava.025@gmail.com', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -257,11 +275,16 @@ export function Contact() {
               'Database-dependent product capacity (no artificial plan cap) + Free database setup assistance + 24×7 Support included',
           }),
         })
+        if (!response.ok) throw new Error('Delivery unavailable')
+        const receipt = await response.json()
+        if (receipt.success !== true && receipt.success !== 'true') throw new Error('Delivery was not confirmed')
+        delivered = true
       } catch (emailErr) {
         console.warn('Email webhook warning:', emailErr)
       }
 
-      // 3. Show confirmation popup
+      // Confirm receipt before telling the visitor that the brief was sent.
+      if (!delivered) throw new Error('Delivery was not confirmed')
       setShowSuccessModal(true)
       setFormData((prev) => ({
         ...prev,
@@ -320,14 +343,15 @@ export function Contact() {
         setFormData((prev) => ({ ...prev, name: session.name }))
       }
       setShowAuthModal(false)
+      setAuthForm(previous => ({ ...previous, password: '' }))
 
       if (pendingSubmitAfterAuth) {
         setPendingSubmitAfterAuth(false)
         await executePrototypeSubmission(session)
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Authentication failed. Please try again.'
-      setAuthError(msg)
+      const msg = err instanceof Error ? err.message : 'Please try again.'
+      setAuthError(msg.includes('Firebase:') ? 'We could not sign you in. Check your email and password, then try again.' : msg)
     } finally {
       setIsAuthBusy(false)
     }
@@ -347,6 +371,7 @@ export function Contact() {
         description: `Connected as ${session.email}`,
       })
       setShowAuthModal(false)
+      setAuthForm(previous => ({ ...previous, password: '' }))
       if (pendingSubmitAfterAuth) {
         setPendingSubmitAfterAuth(false)
         await executePrototypeSubmission(session)
@@ -377,6 +402,8 @@ export function Contact() {
         name: prev.name || formData.name.trim(),
       }))
       setPendingSubmitAfterAuth(true)
+      setAuthError('')
+      setShowPassword(false)
       setShowAuthModal(true)
       return
     }
@@ -393,535 +420,97 @@ export function Contact() {
     })
   }
 
+  const goBriefStep = (step: number) => {
+    setBriefStep(step)
+    requestAnimationFrame(() => {
+      const panel = document.getElementById('brief-form-panel')
+      if (panel) window.scrollTo({ top: window.scrollY + panel.getBoundingClientRect().top - 110, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
+      document.getElementById('brief-step-title')?.focus({ preventScroll: true })
+    })
+  }
+  const themes = [
+    { name: 'Atelier Luxury (Editorial)', title: 'Atelier', description: 'Warm, editorial', color: 'atelier' },
+    { name: 'Cyber Hardware (Matte Dark)', title: 'Obsidian', description: 'Dark, precise', color: 'obsidian' },
+    { name: 'Nordic Living (Warm Minimal)', title: 'Nordic', description: 'Soft, natural', color: 'nordic' },
+    { name: 'Lumière (Clean Skincare)', title: 'Lumière', description: 'Light, refined', color: 'lumiere' },
+  ]
+  const intentNames: Record<OnboardingIntent, string> = {
+    free_prototype: 'Free prototype', free_trial_7d: '7-day trial',
+    starter: 'Starter · ₹3,999', creator: 'Creator · ₹4,999', premium: 'Premium · ₹5,999',
+  }
+  const advanceBrief = (event: React.FormEvent) => {
+    if (briefStep === 0) {
+      event.preventDefault()
+      if (!formData.name.trim() || !formData.handle.trim()) {
+        setProfileError('Add your name and social profile to continue.')
+        document.getElementById(!formData.name.trim() ? 'intake-name' : 'intake-handle')?.focus()
+        return
+      }
+      setProfileError('')
+      goBriefStep(1)
+    } else {
+      void handleFormSubmit(event)
+    }
+  }
+
   return (
-    <section id="contact" className="relative py-32 bg-card/30">
-      <div className="container mx-auto px-6 sm:px-8 lg:px-12">
-        {/* Sample Websites Section */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="w-3 h-3 bg-accent-emerald rounded-full animate-pulse" />
-            <span className="text-sm font-semibold text-muted-foreground">
-              Live Storefront Demos · Explore Sample Websites
-            </span>
-            <div className="w-3 h-3 bg-accent-blue rounded-full animate-pulse" />
-          </div>
-          
-          <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight mb-6">
-            <span className="block mb-2">Explore Live Sample Websites.</span>
-          </h2>
-          
-          <p className="text-xl sm:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-12">
-            Preview 6 live sample websites below to experience different storefront layouts and aesthetics—then request your own tailored prototype for all countries worldwide.
-          </p>
-
-          {/* 6 Theme-Matched Sample Website Buttons */}
-          <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SAMPLE_WEBSITES.map((site) => (
-              <a
-                key={site.id}
-                href={site.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group bg-background clean-border rounded-2xl p-5 subtle-shadow hover:border-foreground hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between text-left cursor-pointer"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                      <span className={`w-2 h-2 rounded-full ${site.accent}`} />
-                      {site.badge.split(' · ')[0]}
-                    </span>
-                    <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
-                  </div>
-                  <div className="font-black text-base text-foreground group-hover:text-accent-blue transition-colors leading-snug mb-1.5">
-                    {site.name}
-                  </div>
-                  <p className="text-xs text-muted-foreground font-medium">
-                    {site.badge.split(' · ')[1]}
-                  </p>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
-                  <span className="text-xs font-bold text-foreground">
-                    View Sample Site
-                  </span>
-                  <span className="text-xs font-black text-foreground group-hover:translate-x-1 transition-transform">
-                    →
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Contact Form */}
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-background clean-border rounded-3xl overflow-hidden elevated-shadow">
-            <div className="bg-card/50 px-8 py-6 border-b border-border">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-accent-blue block mb-1">
-                    Direct Application
-                  </span>
-                  <h3 className="text-xl font-black text-foreground mb-1">
-                    Reserve Your Storefront Build
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Share your creator profile to receive a tailored storefront prototype.
-                  </p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-accent-emerald rounded-full" />
-                  <span className="text-sm text-muted-foreground font-medium">
-                    Avg. reply: &lt; 20 mins · 12 build slots / month
-                  </span>
-                </div>
-              </div>
-
-              {/* Account Sign-Up / Sign-In Bar */}
-              <div className="mt-5 pt-4 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                {account ? (
-                  <div className="flex items-center justify-between w-full gap-3">
-                    <div className="flex items-center gap-2.5 text-sm">
-                      <ShieldCheck className="w-4 h-4 text-accent-emerald shrink-0" />
-                      <span className="text-muted-foreground">
-                        Signed in as <strong className="text-foreground">{account.name}</strong> ({account.email})
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleSignOut}
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                      Sign Out
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-3">
-                    <div className="text-sm text-muted-foreground">
-                      <span className="font-semibold text-foreground">Creator Account Required:</span> Sign up once or sign in—your credentials are remembered automatically.
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAuthMode('signup')
-                          setAuthError('')
-                          setShowAuthModal(true)
-                        }}
-                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-foreground text-background text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer"
-                      >
-                        <UserPlus className="w-3.5 h-3.5" />
-                        Sign Up
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAuthMode('signin')
-                          setAuthError('')
-                          setShowAuthModal(true)
-                        }}
-                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-card border border-border text-foreground text-xs font-bold hover:bg-accent transition-colors cursor-pointer"
-                      >
-                        <LogIn className="w-3.5 h-3.5" />
-                        Sign In
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+    <section className="atelier-contact" aria-label="Storefront enquiry">
+      <div className="sample-edit">
+        <div><h2>Find your direction.</h2><p>A few starting points. An entirely personal result.</p></div>
+        <details className="sample-disclosure"><summary>Explore sample storefronts <span aria-hidden="true">+</span></summary><div className="sample-links">{SAMPLE_WEBSITES.map(site => <a href={site.url} key={site.id} target="_blank" rel="noopener noreferrer">{site.name}<ArrowUpRight size={16} aria-hidden="true" /></a>)}</div></details>
+      </div>
+      <div className="brief-layout" id="contact">
+        <aside className="brief-intro">
+          <h2>Make it<br />unmistakably yours.</h2>
+          <p>Tell us about your world. We’ll help turn your recommendations into a storefront with a point of view.</p>
+          <figure><img src="/films/watch-detail.jpg" alt="Close-up of the watch from the product film" loading="lazy" /><figcaption>Considered down to the detail.</figcaption></figure>
+          <div className="brief-reassurance"><span>A free prototype to begin.</span><span>One-time ownership when you’re ready.</span></div>
+        </aside>
+        <div className="brief-panel" id="brief-form-panel">
+          <nav className="brief-progress" aria-label="Storefront brief progress">
+            <button type="button" aria-current={briefStep === 0 ? 'step' : undefined} onClick={() => goBriefStep(0)}>{briefStep > 0 && <Check size={15} aria-hidden="true" />}Your profile</button>
+            <span aria-hidden="true">/</span>
+            <span aria-current={briefStep === 1 ? 'step' : undefined}>Your vision</span>
+          </nav>
+          <form className="brief-form" onSubmit={advanceBrief}>
+            <div className="brief-step-heading" aria-live="polite"><h3 id="brief-step-title" tabIndex={-1}>{briefStep === 0 ? 'A little about you.' : 'Set the direction.'}</h3><p>{briefStep === 0 ? 'Start with the person behind the collection.' : 'Choose a starting style. We’ll tailor the details together.'}</p></div>
+            {briefStep === 0 ? <div className="brief-fields" key="profile">
+              <div className="field-pair"><div className="atelier-field"><label htmlFor="intake-name">Your name</label><input id="intake-name" type="text" autoComplete="name" required maxLength={100} placeholder="Full name" value={formData.name} onChange={event => setFormData(previous => ({ ...previous, name: event.target.value }))} /></div><div className="atelier-field"><label htmlFor="intake-handle">Social profile</label><input id="intake-handle" type="text" autoCapitalize="none" spellCheck={false} required maxLength={255} placeholder="@yourname or profile URL" value={formData.handle} onChange={event => setFormData(previous => ({ ...previous, handle: event.target.value }))} /></div></div>
+              {profileError && <p className="atelier-error" role="alert">{profileError}</p>}
+              <div className="atelier-field"><label htmlFor="intake-niche">What do you curate?</label><select id="intake-niche" value={formData.niche} onChange={event => setFormData(previous => ({ ...previous, niche: event.target.value }))}>{['Fashion & Luxury Apparel', 'Consumer Tech & Studio Audio', 'Skincare, Fragrance & Beauty', 'Interior Design & Home', 'Fitness & Performance Gear'].map(niche => <option key={niche}>{niche}</option>)}</select></div>
+              <div className="atelier-field"><label htmlFor="intake-intent">Where would you like to start?</label><select id="intake-intent" value={formData.onboardingIntent} onChange={event => setFormData(previous => ({ ...previous, onboardingIntent: event.target.value as OnboardingIntent }))}>{Object.entries(intentNames).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select><span className="field-help">Paid plans are a one-time payment.</span></div>
+            </div> : <div className="brief-fields" key="vision">
+              <fieldset className="theme-fieldset"><legend>Choose your starting style</legend><div className="theme-options">{themes.map(theme => <label key={theme.name} className={`theme-option ${formData.theme === theme.name ? 'is-selected' : ''}`}><input type="radio" name="storefront-theme" value={theme.name} checked={formData.theme === theme.name} onChange={() => setFormData(previous => ({ ...previous, theme: theme.name }))} /><span className={`theme-swatch theme-${theme.color}`} aria-hidden="true"><span>M</span></span><span className="theme-name">{theme.title}{formData.theme === theme.name && <Check size={14} aria-hidden="true" />}</span><span className="theme-description">{theme.description}</span></label>)}</div></fieldset>
+              <div className="atelier-field"><label htmlFor="intake-description">Tell us what you have in mind <span>Optional</span></label><textarea id="intake-description" rows={4} maxLength={1500} placeholder="The mood, the products, the details that make it yours…" value={formData.storeDescription} onChange={event => setFormData(previous => ({ ...previous, storeDescription: event.target.value }))} /><span className="field-help field-count">{formData.storeDescription.length} / 1,500</span></div>
+              <details className="audience-disclosure"><summary>Where is your audience?<span>{formData.selectedCountries.length === 1 && formData.selectedCountries[0] === 'Global (All Countries)' ? 'Worldwide' : `${formData.selectedCountries.length} selected`} <span aria-hidden="true">+</span></span></summary><fieldset><legend className="sr-only">Audience countries</legend><div className="country-options">{COUNTRY_OPTIONS.map(country => <label key={country.id}><input type="checkbox" checked={formData.selectedCountries.includes(country.id)} onChange={() => toggleCountry(country.id)} /><span>{country.label}</span></label>)}</div></fieldset><div className="atelier-field"><label htmlFor="intake-other-countries">Other countries <span>Optional</span></label><input id="intake-other-countries" maxLength={150} placeholder="Add any specific regions" value={formData.otherCountries} onChange={event => setFormData(previous => ({ ...previous, otherCountries: event.target.value }))} /></div></details>
+              <div className="brief-summary"><span>{intentNames[formData.onboardingIntent]}</span><button type="button" onClick={() => goBriefStep(0)}>Edit your profile</button></div>
+            </div>}
+            <div className="brief-actions">
+              {briefStep === 1 && <button className="brief-back" type="button" onClick={() => goBriefStep(0)}><ArrowLeft size={16} aria-hidden="true" />Back</button>}
+              <button className="atelier-primary" type="submit" disabled={isSubmitting || isAuthBusy}>{isSubmitting ? <><Loader2 className="spin" size={18} aria-hidden="true" />Sending your brief</> : <>{briefStep === 0 ? 'Continue to your vision' : account ? 'Send your brief' : 'Continue with your account'}<ArrowRight size={18} aria-hidden="true" /></>}</button>
             </div>
-            
-            <form onSubmit={handleFormSubmit} className="p-8 space-y-6">
-              {/* Registration / Plan Selection */}
-              <div>
-                <label htmlFor="intake-intent" className="block text-sm font-semibold text-foreground mb-2">
-                  Selected Registration / One-Time Plan Option
-                </label>
-                <select
-                  id="intake-intent"
-                  value={formData.onboardingIntent}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      onboardingIntent: e.target.value as OnboardingIntent,
-                    }))
-                  }
-                  className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground font-semibold focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
-                >
-                  <option value="free_prototype">
-                    Register for Your Prototype — Absolutely Free
-                  </option>
-                  <option value="free_trial_7d">
-                    Start Your 7-Day Free Trial (Experience Live Platform)
-                  </option>
-                  <option value="starter">
-                    Starter Plan — ₹3,999 One-Time Payment (Auto-Fetch Links + Country Storefronts + Free DB Setup)
-                  </option>
-                  <option value="creator">
-                    Creator Plan — ₹4,999 One-Time Payment (Smart Catalog + Country Storefronts + Advanced Themes)
-                  </option>
-                  <option value="premium">
-                    Premium Plan — ₹5,999 One-Time Payment (1-Click Refresh + Visual Editor + Priority Support)
-                  </option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="intake-name" className="block text-sm font-semibold text-foreground mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    id="intake-name"
-                    type="text"
-                    maxLength={100}
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
-                    placeholder="Sarah Jenkins"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="intake-handle" className="block text-sm font-semibold text-foreground mb-2">
-                    Primary Social Handle or URL
-                  </label>
-                  <input
-                    id="intake-handle"
-                    type="text"
-                    maxLength={255}
-                    value={formData.handle}
-                    onChange={(e) => setFormData(prev => ({ ...prev, handle: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
-                    placeholder="@sarah.curates"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="intake-niche" className="block text-sm font-semibold text-foreground mb-2">
-                    Creator Niche
-                  </label>
-                  <select
-                    id="intake-niche"
-                    value={formData.niche}
-                    onChange={(e) => setFormData(prev => ({ ...prev, niche: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
-                  >
-                    <option value="Fashion & Luxury Apparel">Fashion &amp; Luxury Apparel</option>
-                    <option value="Consumer Tech & Studio Audio">Consumer Tech &amp; Studio Audio</option>
-                    <option value="Skincare, Fragrance & Beauty">Skincare, Fragrance &amp; Beauty</option>
-                    <option value="Interior Design & Home">Interior Design &amp; Home</option>
-                    <option value="Fitness & Performance Gear">Fitness &amp; Performance Gear</option>
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="intake-theme" className="block text-sm font-semibold text-foreground mb-2">
-                    Preferred Storefront Style
-                  </label>
-                  <select
-                    id="intake-theme"
-                    value={formData.theme}
-                    onChange={(e) => setFormData(prev => ({ ...prev, theme: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
-                  >
-                    <option value="Atelier Luxury (Editorial)">Atelier Luxury (Editorial)</option>
-                    <option value="Cyber Hardware (Matte Dark)">Cyber Hardware (Matte Dark)</option>
-                    <option value="Nordic Living (Warm Minimal)">Nordic Living (Warm Minimal)</option>
-                    <option value="Lumière (Clean Skincare)">Lumière (Clean Skincare)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
-                  <label className="block text-sm font-semibold text-foreground">
-                    Primary Audience Countries / Regions (Select All That Apply)
-                  </label>
-                  <span className="text-xs text-accent-blue font-medium flex items-center gap-1">
-                    <Globe className="w-3.5 h-3.5" />
-                    All countries supported · Add more anytime later
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 mb-3">
-                  {COUNTRY_OPTIONS.map((country) => {
-                    const isSelected = formData.selectedCountries.includes(country.id)
-                    return (
-                      <label
-                        key={country.id}
-                        className={`px-3.5 py-2.5 rounded-xl border flex items-center gap-2 cursor-pointer transition-colors ${
-                          isSelected
-                            ? 'bg-foreground/5 border-foreground text-foreground font-semibold'
-                            : 'bg-card border-border text-muted-foreground hover:bg-accent'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleCountry(country.id)}
-                          className="accent-foreground"
-                        />
-                        <span className="text-xs leading-tight">{country.label}</span>
-                      </label>
-                    )
-                  })}
-                </div>
-
-                <input
-                  type="text"
-                  maxLength={150}
-                  value={formData.otherCountries}
-                  onChange={(e) => setFormData(prev => ({ ...prev, otherCountries: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all"
-                  placeholder="Any other specific countries? (Optional — you can also add more countries anytime after launch)"
-                />
-              </div>
-
-              {/* New Field: Describe Store Looks & Features */}
-              <div>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
-                  <label htmlFor="intake-description" className="block text-sm font-semibold text-foreground">
-                    Describe the Looks &amp; Features for Your Store
-                  </label>
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-accent-purple" />
-                    Custom colors, vibe, sections, or special features
-                  </span>
-                </div>
-                <textarea
-                  id="intake-description"
-                  rows={4}
-                  maxLength={1500}
-                  value={formData.storeDescription}
-                  onChange={(e) => setFormData(prev => ({ ...prev, storeDescription: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50 transition-all resize-none"
-                  placeholder="Tell us how you want your storefront to look and work (e.g., dark luxury aesthetic, custom outfit lookbooks, top 10 gear picks, brand story video header, multi-retailer price comparison)..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting || isAuthBusy}
-                className="w-full py-4 rounded-xl bg-foreground text-background font-black text-lg hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
-              >
-                {isSubmitting
-                  ? 'Submitting Registration...'
-                  : !account
-                  ? 'Sign Up / Sign In & Register Free Prototype'
-                  : 'Register Free Prototype'}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* Bottom Info */}
-        <div className="text-center mt-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="bg-background clean-border rounded-2xl p-6 subtle-shadow">
-              <div className="w-12 h-12 bg-accent-blue/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div className="w-6 h-6 bg-accent-blue rounded-full" />
-              </div>
-              <h4 className="font-black text-foreground mb-2">6 Live Sample Websites</h4>
-              <p className="text-muted-foreground text-sm">
-                Explore our live sample storefronts above or request your custom prototype below
-              </p>
-            </div>
-            
-            <div className="bg-background clean-border rounded-2xl p-6 subtle-shadow">
-              <div className="w-12 h-12 bg-accent-emerald/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div className="w-6 h-6 bg-accent-emerald rounded-full" />
-              </div>
-              <h4 className="font-black text-foreground mb-2">One-Time Setup Fee</h4>
-              <p className="text-muted-foreground text-sm">
-                $0/month forever and 0% platform cut — You keep 100% of affiliate payouts
-              </p>
-            </div>
-            
-            <div className="bg-background clean-border rounded-2xl p-6 subtle-shadow">
-              <div className="w-12 h-12 bg-accent-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div className="w-6 h-6 bg-accent-purple rounded-full" />
-              </div>
-              <h4 className="font-black text-foreground mb-2">All Countries Supported</h4>
-              <p className="text-muted-foreground text-sm">
-                Built-in global geo-routing for every country — plus add new countries anytime later
-              </p>
-            </div>
-          </div>
+            <p className="brief-footnote">{briefStep === 0 ? 'Your details stay here as you explore the next step.' : account ? 'Review your direction, then send it to the team.' : 'Sign in or create an account to send your brief.'}</p>
+          </form>
+          <div className="brief-account">{account ? <><span>Signed in as <strong>{account.name}</strong></span><button type="button" onClick={handleSignOut}><LogOut size={14} aria-hidden="true" />Sign out</button></> : <><span>Already have an account?</span><button type="button" onClick={() => openAuth('signin')}>Sign in <ArrowUpRight size={15} aria-hidden="true" /></button></>}</div>
         </div>
       </div>
-
-      {/* Sign Up / Sign In Modal */}
-      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
-        <DialogContent className="sm:max-w-md rounded-2xl bg-background border border-border p-6 sm:p-8">
-          <DialogHeader className="space-y-2 text-left">
-            <DialogTitle className="text-2xl font-black text-foreground">
-              {authMode === 'signup' ? 'Create Your Creator Account' : 'Welcome Back — Sign In'}
-            </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              {authMode === 'signup'
-                ? 'Sign up once to request your custom storefront prototype. We will remember your credentials for future visits.'
-                : 'Sign in with your saved email and password to continue.'}
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Mode Switch Tabs */}
-          <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-card border border-border mt-2">
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('signup')
-                setAuthError('')
-              }}
-              className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                authMode === 'signup'
-                  ? 'bg-foreground text-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              First-Time Sign Up
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('signin')
-                setAuthError('')
-              }}
-              className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                authMode === 'signin'
-                  ? 'bg-foreground text-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Returning Sign In
-            </button>
-          </div>
-
-          <form onSubmit={handleAuthSubmit} className="space-y-4 mt-2">
-            {authMode === 'signup' && (
-              <div>
-                <label htmlFor="auth-name" className="block text-xs font-semibold text-foreground mb-1.5">
-                  Full Name
-                </label>
-                <input
-                  id="auth-name"
-                  type="text"
-                  required
-                  value={authForm.name}
-                  onChange={(e) => setAuthForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-card border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
-                  placeholder="Sarah Jenkins"
-                />
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="auth-email" className="block text-xs font-semibold text-foreground mb-1.5">
-                Email Address
-              </label>
-              <input
-                id="auth-email"
-                type="email"
-                required
-                autoComplete="email"
-                value={authForm.email}
-                onChange={(e) => setAuthForm(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-card border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
-                placeholder="you@example.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="auth-password" className="block text-xs font-semibold text-foreground mb-1.5">
-                Password
-              </label>
-              <input
-                id="auth-password"
-                type="password"
-                required
-                autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'}
-                value={authForm.password}
-                onChange={(e) => setAuthForm(prev => ({ ...prev, password: e.target.value }))}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-card border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
-                placeholder="At least 6 characters"
-              />
-            </div>
-
-            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-              <input
-                type="checkbox"
-                checked={authForm.rememberMe}
-                onChange={(e) => setAuthForm(prev => ({ ...prev, rememberMe: e.target.checked }))}
-                className="accent-foreground"
-              />
-              <span>Remember my credentials on this device</span>
-            </label>
-
-            {authError && (
-              <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium">
-                {authError}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isAuthBusy}
-              className="w-full py-3 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
-            >
-              {isAuthBusy
-                ? 'Please wait...'
-                : authMode === 'signup'
-                ? 'Sign Up & Continue'
-                : 'Sign In & Continue'}
-            </button>
+      <Dialog open={showAuthModal} onOpenChange={open => { setShowAuthModal(open); if (!open) { setPendingSubmitAfterAuth(false); setAuthForm(previous => ({ ...previous, password: '' })) } }}>
+        <DialogContent overlayClassName="atelier-overlay" className="atelier-auth" onOpenAutoFocus={event => { event.preventDefault(); document.getElementById(authMode === 'signup' ? 'auth-name' : 'auth-email')?.focus() }}>
+          <span className="auth-wordmark" aria-hidden="true">monolith®</span>
+          <DialogHeader className="atelier-auth-heading"><DialogTitle>{authMode === 'signup' ? 'A space of your own.' : 'Welcome back.'}</DialogTitle><DialogDescription>{pendingSubmitAfterAuth ? 'Your brief is ready. Continue with your account to send it.' : authMode === 'signup' ? 'Create your account to begin your storefront.' : 'Sign in to continue your storefront journey.'}</DialogDescription></DialogHeader>
+          <button className="atelier-google" type="button" onClick={handleGoogleAuth} disabled={isAuthBusy}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.6 12.2c0-.7-.1-1.5-.2-2.2H12v4.2h5.4a4.6 4.6 0 0 1-2 3v2.5h3.3c1.9-1.8 2.9-4.3 2.9-7.5ZM12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.5c-.9.6-2 .9-3.4.9-2.6 0-4.9-1.8-5.7-4.1H2.9v2.6A10 10 0 0 0 12 22ZM6.3 13.9a6 6 0 0 1 0-3.8V7.5H2.9a10 10 0 0 0 0 9l3.4-2.6ZM12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.9A9.6 9.6 0 0 0 12 2a10 10 0 0 0-9.1 5.5l3.4 2.6C7.1 7.8 9.4 6 12 6Z" /></svg>Continue with Google</button>
+          <p className="auth-separator">or use your email</p>
+          <form className="atelier-auth-form" onSubmit={handleAuthSubmit}>
+            {authMode === 'signup' && <div className="atelier-field"><label htmlFor="auth-name">Your name</label><input id="auth-name" autoComplete="name" required maxLength={100} value={authForm.name} onChange={event => setAuthForm(previous => ({ ...previous, name: event.target.value }))} placeholder="Full name" disabled={isAuthBusy} /></div>}
+            <div className="atelier-field"><label htmlFor="auth-email">Email address</label><input id="auth-email" type="email" autoComplete="email" autoCapitalize="none" required disabled={isAuthBusy} value={authForm.email} onChange={event => { setAuthError(''); setAuthForm(previous => ({ ...previous, email: event.target.value })) }} placeholder="you@example.com" /></div>
+            <div className="atelier-field"><label htmlFor="auth-password">Password</label><div className="password-field"><input id="auth-password" type={showPassword ? 'text' : 'password'} autoComplete={authMode === 'signup' ? 'new-password' : 'current-password'} minLength={6} required disabled={isAuthBusy} aria-describedby={authMode === 'signup' ? 'password-help' : undefined} value={authForm.password} onChange={event => { setAuthError(''); setAuthForm(previous => ({ ...previous, password: event.target.value })) }} placeholder={authMode === 'signup' ? 'Create a password' : 'Your password'} /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}</button></div>{authMode === 'signup' && <span className="field-help" id="password-help">Use at least 6 characters.</span>}</div>
+            {authError && <p className="atelier-error" role="alert">{authError}</p>}
+            <button className="atelier-primary" type="submit" disabled={isAuthBusy}>{isAuthBusy ? <><Loader2 className="spin" size={18} aria-hidden="true" />Connecting</> : <>{authMode === 'signup' ? 'Create account' : 'Sign in'}<ArrowRight size={18} aria-hidden="true" /></>}</button>
           </form>
-
-          <div className="relative my-2 flex items-center justify-center">
-            <div className="border-t border-border w-full" />
-            <span className="bg-background px-3 text-xs text-muted-foreground">OR</span>
-            <div className="border-t border-border w-full" />
-          </div>
-
-          <button
-            type="button"
-            onClick={handleGoogleAuth}
-            disabled={isAuthBusy}
-            className="w-full py-2.5 px-4 rounded-xl bg-card border border-border text-foreground font-semibold text-xs hover:bg-accent transition-colors flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <LogIn className="w-4 h-4" />
-            Continue with Google
-          </button>
+          <p className="auth-switch">{authMode === 'signup' ? 'Already have an account?' : 'New to Monolith?'}<button type="button" onClick={switchAuth} disabled={isAuthBusy}>{authMode === 'signup' ? 'Sign in' : 'Create an account'}</button></p>
         </DialogContent>
       </Dialog>
-
-      {/* Confirmation Popup Modal */}
-      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="sm:max-w-md rounded-2xl bg-background border border-border p-8 text-center">
-          <DialogHeader className="flex flex-col items-center text-center space-y-3">
-            <div className="w-14 h-14 rounded-full bg-accent-emerald/15 flex items-center justify-center mx-auto mb-2">
-              <CheckCircle2 className="w-8 h-8 text-accent-emerald" />
-            </div>
-            <DialogTitle className="text-2xl font-black text-foreground text-center">
-              Your Request is Submitted!
-            </DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground leading-relaxed text-center pt-1">
-              Your request is submitted, our team will contact you once your prototype is ready.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={() => setShowSuccessModal(false)}
-              className="w-full py-3 rounded-xl bg-foreground text-background font-bold text-sm hover:opacity-90 transition-opacity cursor-pointer"
-            >
-              Done
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}><DialogContent overlayClassName="atelier-overlay" className="atelier-auth atelier-success"><CheckCircle2 size={32} aria-hidden="true" /><DialogHeader className="atelier-auth-heading"><DialogTitle>Your brief is with us.</DialogTitle><DialogDescription>We’ll contact you about your storefront prototype.</DialogDescription></DialogHeader><button className="atelier-primary" onClick={() => setShowSuccessModal(false)}>Back to exploring<ArrowRight size={18} aria-hidden="true" /></button></DialogContent></Dialog>
     </section>
   )
 }

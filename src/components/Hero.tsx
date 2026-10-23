@@ -1,353 +1,175 @@
-'use client'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowDown, ArrowUpRight, Menu, X, Pause, Play } from 'lucide-react'
 
-import { motion } from 'framer-motion'
-import { Volume2, VolumeX, Menu, X } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
+const films = [
+  { id: 'headphones', name: 'Audio', title: <>Your taste.<br />Your storefront.</>, description: 'Turn your recommendations into a shopping destination that feels entirely yours.', note: 'Sound, curated.', category: 'Headphones', detail: 'A closer look at the things worth sharing.' },
+  { id: 'fragrance', name: 'Fragrance', title: <>Leave an<br />impression.</>, description: 'Give every recommendation its own story. Bring fragrance, fashion and everyday finds into one considered collection.', note: 'A signature, bottled.', category: 'Fragrance', detail: 'Build a collection around your point of view.' },
+  { id: 'watch', name: 'Watches', title: <>Make every<br />detail matter.</>, description: 'An editorial storefront gives your audience the context behind your choices, from the first impression to the finer details.', note: 'Time, considered.', category: 'Watches', detail: 'Let your eye for detail do the talking.' },
+  { id: 'sneaker', name: 'Footwear', title: <>Move beyond<br />the link.</>, description: 'Connect footwear, accessories and the rest of your world. Help people discover the next thing they will love.', note: 'A different perspective.', category: 'Footwear', detail: 'One destination for everything you recommend.' },
+  { id: 'camera', name: 'Cameras', title: <>Frame your<br />own world.</>, description: 'Your products. Your perspective. One branded home for your affiliate links, with purchases handled by the original retailers.', note: 'Made for your vision.', category: 'Cameras', detail: 'Start with your taste. Make it your own.' },
+]
+const clamp = (n: number) => Math.max(0, Math.min(1, n))
 
 export function Hero() {
-  const [isMuted, setIsMuted] = useState(true)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const stage = useRef<HTMLDivElement>(null)
+  const chapters = useRef<(HTMLElement | null)[]>([])
+  const videos = useRef<(HTMLVideoElement | null)[]>([])
+  const progressRef = useRef(0)
+  const [active, setActive] = useState(0)
+  const [menu, setMenu] = useState(false)
+  const [still, setStill] = useState(false)
+  const [failed, setFailed] = useState<Record<string, boolean>>({})
+  const [ready, setReady] = useState<Record<string, boolean>>({})
 
-  // Scroll detection
+  const clipCache = useRef(new Map<string, string>())
+  const [sources, setSources] = useState<Record<string, string>>({})
+  const userInteracted = useRef(false)
+
+  // Blob-backed clips remain seekable on hosts without HTTP range support.
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY
-      setIsScrolled(scrollTop > 50) // Show background after 50px scroll
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Ensure video is muted immediately on load and handle browser power-saving pauses gracefully
-  useEffect(() => {
-    const videoEl = videoRef.current
-    if (!videoEl) return
-
-    videoEl.volume = 0
-    videoEl.muted = true
-    videoEl.defaultMuted = true
-
-    const safePlay = () => {
-      if (!videoEl || document.hidden) return
-      const playPromise = videoEl.play()
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Browsers may pause background video-only media to save power; ignore benign AbortError
+    if (still) return
+    const controller = new AbortController()
+    films.filter((_, index) => Math.abs(index - active) <= 1).forEach(film => {
+      if (clipCache.current.has(film.id)) return
+      fetch(`/films/${film.id}.mp4`, { signal: controller.signal })
+        .then(response => { if (!response.ok) throw new Error('Film unavailable'); return response.blob() })
+        .then(blob => {
+          if (controller.signal.aborted) return
+          const source = URL.createObjectURL(blob)
+          clipCache.current.set(film.id, source)
+          setSources(previous => ({ ...previous, [film.id]: source }))
         })
-      }
+        .catch(() => { if (!controller.signal.aborted) setFailed(previous => ({ ...previous, [film.id]: true })) })
+    })
+    return () => controller.abort()
+  }, [active, still])
+
+  useEffect(() => {
+    const cache = clipCache.current
+    const prime = () => {
+      userInteracted.current = true
+      videos.current.forEach(video => {
+        if (video?.readyState && !video.dataset.primed) {
+          video.dataset.primed = 'true'
+          video.play().then(() => video.pause()).catch(() => {})
+        }
+      })
     }
-
-    const handlePlay = () => {
-      videoEl.muted = isMuted
-      videoEl.volume = isMuted ? 0 : 0.7
-    }
-
-    const handleTimeUpdate = () => {
-      if (videoEl.currentTime >= 51.4) {
-        videoEl.currentTime = 0
-        safePlay()
-      }
-    }
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden && videoEl.paused) {
-        safePlay()
-      }
-    }
-
-    videoEl.addEventListener('play', handlePlay)
-    videoEl.addEventListener('timeupdate', handleTimeUpdate)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    safePlay()
-
+    window.addEventListener('pointerdown', prime, { once: true, passive: true })
     return () => {
-      videoEl.removeEventListener('play', handlePlay)
-      videoEl.removeEventListener('timeupdate', handleTimeUpdate)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pointerdown', prime)
+      cache.forEach(source => URL.revokeObjectURL(source))
+      cache.clear()
     }
   }, [])
 
-  // Update video mute state when isMuted changes
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = isMuted
-      videoRef.current.volume = isMuted ? 0 : 0.7
-    }
-  }, [isMuted])
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setStill(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
 
-  // Handle body scroll lock when mobile menu is open
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isMobileMenuOpen])
-
-  // Close mobile menu on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      if (isMobileMenuOpen) {
-        setIsMobileMenuOpen(false)
+    let raf = 0
+    let previous = performance.now()
+    let eased = progressRef.current
+    let lastActive = -1
+    let visible = true
+    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting }, { rootMargin: '100px' })
+    if (stage.current) observer.observe(stage.current)
+    const tick = (now: number) => {
+      const dt = Math.min(now - previous, 64)
+      previous = now
+      if (visible && !document.hidden) {
+        let index = 0
+        for (let i = 0; i < chapters.current.length; i++) {
+          const chapter = chapters.current[i]
+          if (chapter && chapter.getBoundingClientRect().top <= window.innerHeight * 0.1) index = i
+        }
+        const chapter = chapters.current[index]
+        if (chapter) {
+          const rect = chapter.getBoundingClientRect()
+          const target = clamp(-rect.top / Math.max(1, rect.height - window.innerHeight * (index === films.length - 1 ? 1 : 0.15)))
+          if (lastActive !== index) {
+            eased = target
+            lastActive = index
+            setActive(index)
+          }
+          eased += (target - eased) * (1 - Math.exp(-dt / 85))
+          if (Math.abs(target - eased) < 0.0005) eased = target
+          progressRef.current = eased
+          const video = videos.current[index]
+          // Only one seek is in flight: repeatedly overwriting currentTime interrupts decoding.
+          if (!still && video && video.readyState >= 2 && !video.seeking && Number.isFinite(video.duration)) {
+            const time = eased * Math.max(0, video.duration - 0.05)
+            if (Math.abs(video.currentTime - time) > 1 / 45) video.currentTime = time
+          }
+        }
       }
+      raf = requestAnimationFrame(tick)
     }
+    raf = requestAnimationFrame(tick)
+    return () => { cancelAnimationFrame(raf); observer.disconnect() }
+  }, [still])
 
-    if (isMobileMenuOpen) {
-      window.addEventListener('scroll', handleScroll)
-    }
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setMenu(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [isMobileMenuOpen])
-
-
+  const start = () => {
+    window.dispatchEvent(new CustomEvent('select-onboarding-intent', { detail: 'free_prototype' }))
+    document.getElementById('contact')?.scrollIntoView({ behavior: still ? 'instant' : 'smooth' })
+    setMenu(false)
+  }
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-black">
-      {/* MASSIVE VIDEO - Takes up 95% of space */}
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover scale-110"
-        autoPlay
-        muted
-        loop
-        playsInline
-      >
-        <source src="/hero-video.webm" type="video/webm" />
-        Your browser does not support the video tag.
-      </video>
-
-      {/* Full-Width Navbar */}
-      <motion.nav
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-        className="fixed top-0 left-0 right-0 w-full z-[110]"
-      >
-        <div 
-          className={`w-full px-6 sm:px-8 lg:px-12 py-4 transition-all duration-300 ease-out ${
-            isScrolled 
-              ? 'bg-black/80 backdrop-blur-xl border-b border-white/10' 
-              : 'bg-transparent'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="flex items-center cursor-pointer"
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-              }}
-            >
-              <span className="font-bagel text-white text-lg sm:text-xl tracking-wider uppercase">
-                CREATE YOUR OWN AFFILIATE STORE
-              </span>
-            </motion.div>
-
-            {/* Navigation Menu */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a 
-                href="#portfolio" 
-                className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
-              >
-                Experience
-              </a>
-              <a 
-                href="#about" 
-                className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
-              >
-                Auto-Import
-              </a>
-              <a 
-                href="#services" 
-                className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
-              >
-                Capabilities
-              </a>
-              <a 
-                href="#pricing" 
-                className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
-              >
-                Pricing
-              </a>
-              <a 
-                href="#contact" 
-                className="text-white hover:text-white/80 font-medium gentle-animation hover:scale-105"
-              >
-                Ownership
-              </a>
+    <>
+      <a className="skip-link" href="#services">Skip the product films</a>
+      <header className="site-header">
+        <a className="wordmark" href="#hero" aria-label="Monolith home">monolith<span aria-hidden="true">®</span></a>
+        <nav className="desktop-nav" aria-label="Main navigation">
+          <a href="#portfolio">Experience</a><a href="#services">Capabilities</a><a href="#pricing">Ownership</a>
+        </nav>
+        <button className="header-cta" onClick={start}>Build your store <ArrowUpRight size={16} aria-hidden="true" /></button>
+        <button className="menu-toggle" onClick={() => setMenu(!menu)} aria-expanded={menu} aria-controls="mobile-navigation" aria-label={menu ? 'Close navigation' : 'Open navigation'}>{menu ? <X /> : <Menu />}</button>
+        {menu && <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">
+          <a href="#portfolio" onClick={() => setMenu(false)}>Experience</a><a href="#services" onClick={() => setMenu(false)}>Capabilities</a><a href="#pricing" onClick={() => setMenu(false)}>Ownership</a><button onClick={start}>Build your store ↗</button>
+        </nav>}
+      </header>
+      <div className="film-experience" ref={stage} id="portfolio">
+        <div className="film-narrative">
+          {films.map((film, index) => <article key={film.id} ref={el => { chapters.current[index] = el }} className="film-chapter" id={`chapter-${film.id}`}>
+            <div className="chapter-copy">
+              {index === 0 ? <h1>{film.title}</h1> : <h2>{film.title}</h2>}
+              <p>{film.description}</p>
+              <button className="primary-action" onClick={start}>Create your store <ArrowUpRight size={19} aria-hidden="true" /></button>
+              <span className="chapter-caption">{film.detail}</span>
             </div>
-
-            {/* Right Side - Video Controls + Mobile Menu */}
-            <div className="flex items-center space-x-3 relative">
-              {/* Video Controls with Sound On indicator */}
-              <div className="relative">
-                <button
-                  onClick={() => setIsMuted(!isMuted)}
-                  className="glass-effect p-3 rounded-full text-white hover:bg-white/20 gentle-animation cursor-pointer"
-                >
-                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                </button>
-                
-                {/* Sound On indicator - only show when muted */}
-                {isMuted && (
-                  <div className="absolute -bottom-10 right-0 flex items-center text-white/80">
-                    <span className="whitespace-nowrap font-medium text-sm mr-2">Sound On</span>
-                    <span className="text-lg">↗</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Mobile Hamburger Menu Button */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden glass-effect p-3 rounded-full text-white hover:bg-white/20 active:bg-white/30 gentle-animation cursor-pointer z-[120] relative"
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
+            <div className="scroll-invitation"><ArrowDown size={16} aria-hidden="true" /><span>{index === 4 ? 'Discover the possibilities' : 'Scroll to bring it together'}</span></div>
+          </article>)}
         </div>
-      </motion.nav>
-
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-md z-[80] cursor-pointer"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Mobile Menu Panel */}
-      <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: isMobileMenuOpen ? '0%' : '100%' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="md:hidden fixed top-0 right-0 h-full w-72 max-w-[85vw] bg-black/90 backdrop-blur-xl border-l border-white/10 z-[90] mobile-menu-panel pointer-events-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex flex-col h-full">
-          {/* Close Button at the top */}
-          <div className="flex justify-end p-4">
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="glass-effect p-3 rounded-full text-white hover:bg-white/20 active:bg-white/30 gentle-animation cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="film-stage" aria-label="Scroll-controlled product films">
+          <div className="film-window">
+            {films.map((film, index) => <div className={`film-layer ${active === index ? 'is-active' : ''}`} key={film.id} aria-hidden={active !== index}>
+              <img className="film-poster" src={`/films/${film.id}.jpg`} alt="" fetchPriority={index === 0 ? 'high' : 'auto'} loading={index === 0 ? 'eager' : 'lazy'} />
+              {!still && Math.abs(active - index) <= 1 && !failed[film.id] && sources[film.id] && <video ref={el => { videos.current[index] = el }} className={ready[film.id] ? 'is-ready' : ''} src={sources[film.id]} poster={`/films/${film.id}.jpg`} muted playsInline preload={index === active ? 'auto' : 'metadata'} onLoadedData={event => {
+                const video = event.currentTarget
+                setReady(previous => ({ ...previous, [film.id]: true }))
+                if (userInteracted.current && !video.dataset.primed) {
+                  video.dataset.primed = 'true'
+                  video.play().then(() => video.pause()).catch(() => {})
+                }
+              }} onError={() => setFailed(prev => ({ ...prev, [film.id]: true }))} aria-label={`${film.category} assembly film controlled by scrolling`} />}
+            </div>)}
           </div>
-          
-          <div className="flex flex-col px-6 pb-6 h-full">
-            {/* Mobile Navigation Links */}
-            <div className="flex flex-col space-y-4 text-white">
-              <a 
-                href="#portfolio" 
-                className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Experience
-              </a>
-              <a 
-                href="#about" 
-                className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Auto-Import
-              </a>
-              <a 
-                href="#services" 
-                className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Capabilities
-              </a>
-              <a 
-                href="#pricing" 
-                className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Pricing
-              </a>
-              <a 
-                href="#contact" 
-                className="mobile-menu-link px-4 py-3 hover:text-white/80 hover:bg-white/10 rounded-lg gentle-animation font-medium text-lg active:bg-white/20"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Ownership
-              </a>
-            </div>
-
-            {/* Mobile CTA Button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent('select-onboarding-intent', { detail: 'free_prototype' }))
-                const contactSection = document.getElementById('contact')
-                contactSection?.scrollIntoView({ behavior: 'smooth' })
-                setIsMobileMenuOpen(false)
-              }}
-              className="bg-red-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-700 active:bg-red-800 gentle-animation mt-8 cursor-pointer"
-            >
-              Register Free Prototype
-            </motion.button>
-          </div>
+          <button className="film-motion-control" aria-label={still ? 'Enable product motion' : 'Show still images'} aria-pressed={still} onClick={() => setStill(!still)}>{still ? <Play size={16} aria-hidden="true" /> : <Pause size={16} aria-hidden="true" />}</button>
+          {failed[films[active].id] && <span className="sr-only" role="status">Showing a product still because the film could not load.</span>}
         </div>
-      </motion.div>
-
-      {/* Big Studio Title - Lower Left */}
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 1, delay: 1.5 }}
-        className="absolute bottom-8 left-6 sm:left-8 lg:left-12 z-30 pointer-events-none"
-      >
-        <div className="max-w-2xl">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black leading-tight text-white">
-            <span className="block">ONE LINK FOR YOUR</span>
-            <span className="block">ENTIRE AFFILIATE</span>
-            <span className="block">STOREFRONT</span>
-          </h1>
-        </div>
-      </motion.div>
-
-      {/* Center Main Screen CTA Button - Clean & Unobstructed */}
-      <div className="absolute inset-x-0 top-[44%] -translate-y-1/2 flex items-center justify-center z-50 pointer-events-none px-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.9 }}
-          className="pointer-events-auto flex flex-col items-center text-center"
-        >
-          <motion.button
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('select-onboarding-intent', { detail: 'free_prototype' }))
-              const contactSection = document.getElementById('contact')
-              contactSection?.scrollIntoView({ behavior: 'smooth' })
-            }}
-            className="bg-red-600 hover:bg-red-700 text-white font-black text-base sm:text-lg md:text-xl px-8 sm:px-10 py-4 sm:py-5 rounded-xl shadow-[0_20px_50px_rgba(220,38,38,0.5)] border border-white/20 backdrop-blur-md gentle-animation cursor-pointer tracking-wide"
-          >
-            Register Free Prototype
-          </motion.button>
-        </motion.div>
       </div>
-    </div>
+    </>
   )
 }
