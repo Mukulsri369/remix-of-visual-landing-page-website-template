@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { advanceMotion, seekLatest } from '@/lib/scroll-motion'
 import { ArrowDown, ArrowUpRight, Menu, X, Pause, Play } from 'lucide-react'
 
 const films = [
@@ -74,7 +75,18 @@ export function Hero() {
   useEffect(() => {
     let raf = 0
     let previous = performance.now()
-    let eased = progressRef.current
+    let motion = { position: progressRef.current, velocity: 0 }
+    let geometry: { top: number; height: number }[] = []
+    const measure = () => {
+      geometry = chapters.current.map(chapter => {
+        const rect = chapter?.getBoundingClientRect()
+        return { top: (rect?.top ?? 0) + window.scrollY, height: rect?.height ?? 1 }
+      })
+    }
+    measure()
+    const resize = new ResizeObserver(measure)
+    if (stage.current) resize.observe(stage.current)
+    window.addEventListener('resize', measure)
     let lastActive = -1
     let visible = true
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting }, { rootMargin: '100px' })
@@ -85,33 +97,31 @@ export function Hero() {
       if (visible && !document.hidden) {
         let index = 0
         for (let i = 0; i < chapters.current.length; i++) {
-          const chapter = chapters.current[i]
-          if (chapter && chapter.getBoundingClientRect().top <= window.innerHeight * 0.1) index = i
+          if (geometry[i] && geometry[i].top - window.scrollY <= window.innerHeight * 0.1) index = i
         }
-        const chapter = chapters.current[index]
+        const chapter = geometry[index]
         if (chapter) {
-          const rect = chapter.getBoundingClientRect()
-          const target = clamp(-rect.top / Math.max(1, rect.height - window.innerHeight * (index === films.length - 1 ? 1 : 0.15)))
+          const target = clamp((window.scrollY - chapter.top) / Math.max(1, chapter.height - window.innerHeight * (index === films.length - 1 ? 1 : 0.15)))
           if (lastActive !== index) {
-            eased = target
+            motion = { position: target, velocity: 0 }
             lastActive = index
             setActive(index)
           }
-          eased += (target - eased) * (1 - Math.exp(-dt / 85))
-          if (Math.abs(target - eased) < 0.0005) eased = target
-          progressRef.current = eased
+          motion = advanceMotion(motion, target, dt / 1000)
+          progressRef.current = motion.position
           const video = videos.current[index]
-          // Only one seek is in flight: repeatedly overwriting currentTime interrupts decoding.
-          if (!still && video && video.readyState >= 2 && !video.seeking && Number.isFinite(video.duration)) {
-            const time = eased * Math.max(0, video.duration - 0.05)
-            if (Math.abs(video.currentTime - time) > 1 / 45) video.currentTime = time
-          }
+          if (!still && video) seekLatest(video, motion.position)
         }
       }
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
-    return () => { cancelAnimationFrame(raf); observer.disconnect() }
+    return () => {
+      cancelAnimationFrame(raf)
+      observer.disconnect()
+      resize.disconnect()
+      window.removeEventListener('resize', measure)
+    }
   }, [still])
 
   useEffect(() => {
@@ -156,7 +166,9 @@ export function Hero() {
           <div className="film-window">
             {films.map((film, index) => <div className={`film-layer ${active === index ? 'is-active' : ''}`} key={film.id} aria-hidden={active !== index}>
               <img className="film-poster" src={`/films/${film.id}.jpg`} alt="" fetchPriority={index === 0 ? 'high' : 'auto'} loading={index === 0 ? 'eager' : 'lazy'} />
-              {!still && Math.abs(active - index) <= 1 && !failed[film.id] && sources[film.id] && <video ref={el => { videos.current[index] = el }} className={ready[film.id] ? 'is-ready' : ''} src={sources[film.id]} poster={`/films/${film.id}.jpg`} muted playsInline preload={index === active ? 'auto' : 'metadata'} onLoadedData={event => {
+              {!still && Math.abs(active - index) <= 1 && !failed[film.id] && sources[film.id] && <video ref={el => { videos.current[index] = el }} className={ready[film.id] ? 'is-ready' : ''} src={sources[film.id]} poster={`/films/${film.id}.jpg`} muted playsInline preload="auto" onSeeked={event => {
+                if (index === active && !still && !document.hidden) seekLatest(event.currentTarget, progressRef.current)
+              }} onLoadedData={event => {
                 const video = event.currentTarget
                 setReady(previous => ({ ...previous, [film.id]: true }))
                 if (userInteracted.current && !video.dataset.primed) {
