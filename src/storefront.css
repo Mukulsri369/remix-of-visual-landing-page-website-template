@@ -326,3 +326,9 @@ body, #root, .storefront, .storefront main, #hero { overflow: visible !important
 
 html { scroll-behavior: auto; }
 #brief-step-title:focus { outline: none; }
+
+/* Reserve the deferred form's space so approaching it does not move the footer. */
+.contact-loading { min-height: 850px; }
+.contact-loading h2 { max-width: 12ch; font-size: clamp(38px,4.7vw,68px); }
+.contact-loading p { margin-top: 28px; color: var(--page-soft); }
+.film-layer { contain: layout paint; }

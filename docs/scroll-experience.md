@@ -1,13 +1,27 @@
 # Scroll-driven product experience
 
-Five user-supplied films are stored in `public/films/`: headphones, fragrance, watch, sneaker and camera. Each has a poster and detail still derived from the same source.
+Five user-supplied films in `public/films/` retain their existing 1280×720 H.264 encoding, all 24 source frames per second, three-frame keyframe interval, no B-frames, no audio and fast-start metadata. The media files were not recompressed or downscaled in this optimisation.
 
-The films are H.264 at 1280px width, without audio, with a keyframe every three frames, no B-frames and fast-start metadata. The frequent keyframes make reverse and forward seeking responsive; the five files total approximately 34 MB. Original source clips remain untouched.
+## Delivery and decoding
 
-`Hero.tsx` samples native scroll with requestAnimationFrame. A frame-rate-independent critically damped spring carries motion through short pauses and eases to rest (roughly 350ms to reach 99% of a stationary target). Seeking is serial: both animation frames and seek-completion events consume only the latest eased position, so rapid scroll reversals do not queue stale work. Chapter geometry is cached and refreshed on resize instead of forcing layout on every frame. Neighbouring clips preload decoded data for transitions. It mounts only the current film and its neighbours. Clips are fetched as Blob URLs for reliable seekability and are released on component cleanup. Native scrolling moves through the five chapters. The former range input and category controls have been removed. The only media control switches to still images. No wheel or touch gestures are intercepted.
+The active film streams directly from its MP4 URL. It no longer waits for a complete Blob download. There is one active scrubber, with an optional next-film metadata preload after 65% progress. Save-Data and slow connection hints disable that preload. Unmounted videos release their source and decoder and cancel unfinished requests; leaving the experience unmounts its videos. Only nearby posters mount, with the first poster preloaded in HTML.
 
-Reduced motion and the explicit Still mode control show poster images. An unsuccessful film request falls back to its poster. Browsers retain normal native scrolling and keyboard navigation.
+`video-scrubber.ts` maps progress to distinct source frames and allows one decode at a time. Seek completion waits for `requestVideoFrameCallback` to confirm presentation before scheduling the newest target. Old targets and duplicate frames are discarded, rather than queued. A bounded seek-completion fallback handles browsers that omit frame callbacks for paused video; after two missed callbacks it switches to a one-frame fallback instead of imposing that timeout on every seek. This follows the [video frame callback specification](https://wicg.github.io/video-rvfc/).
 
-The redesigned process and plan comparison preserve the existing plan configuration and prototype registration event. The existing Contact component still handles authentication and submissions. Live account creation, payments and submission delivery were not exercised during visual testing.
+`Hero.tsx` uses a critically damped spring for forward/reverse easing. Native passive scroll events wake an animation loop that stops after settling, offscreen and in hidden tabs. Geometry is cached and refreshed on layout resize/font loading. Film mapping uses the stable stage height, avoiding address-bar resize jumps on phones. Reduced motion and the explicit still-mode control retain posters without video requests. No scroll gestures are intercepted.
 
-Install with `npm ci`; run with `npm run dev`; validate with `npm run build` and `npx tsc --noEmit -p tsconfig.app.json`. The SWC compiler is pinned to 1.12.11 because a later native build could not initialise its cache in the local Windows sandbox. The lockfile records the reproducible dependency graph.
+## Startup and account flow
+
+The contact/account module (including Firebase and dialog/toast dependencies) loads when the form approaches the viewport or a storefront CTA is selected. The parent retains the selected plan while the chunk loads, and the contact anchor exists before loading.
+
+Measured production bundle: initial JavaScript 169.65 KB / 54.42 KB gzip, compared with the previous 985.83 KB / 268.85 KB gzip. The account chunk remains approximately 820 KB / 216 KB gzip, but is outside initial loading. Build hashes and exact sizes may change slightly with subsequent edits.
+
+In a local production test with MP4 responses throttled to 256 KiB/s (~2 Mbps), the first 1280px video frame was presented 546ms after the video element mounted, after 65,536 video bytes had been sent. The former Blob path required the complete 4,021,864-byte first film. This is a controlled local measurement, not a guarantee of real-world page-load time. Browser checks cover 390×844 and desktop viewports; actual iOS/Android hardware still needs device testing.
+
+## Validation and hosting
+
+Motion tests require Node 22.6+ (validated with Node 24). Run `npm run test:motion`, `npx tsc --noEmit -p tsconfig.app.json`, and `npm run build`. The motion tests cover refresh-rate independence, coalescing under slow decoding, reversals, frame-presentation backpressure, missing callbacks and cleanup.
+
+The production host/CDN must serve MP4 byte ranges with HTTP 206, a valid Content-Range, and Content-Type video/mp4. Check the actual deployment with `npm run check:media -- https://your-deployment.example`; without an argument it checks localhost:3000. Do not replace the MP4 response with an SPA HTML fallback. Cache media at the CDN and preserve validators (ETag/Last-Modified); use versioned filenames before applying immutable caching. This repository does not assume a particular hosting provider.
+
+Live sign-in, account creation, payments and enquiry delivery are not submitted during visual QA. The SWC compiler remains pinned to 1.12.11 for the local Windows runtime.

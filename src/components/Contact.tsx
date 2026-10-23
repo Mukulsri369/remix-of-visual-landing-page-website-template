@@ -89,7 +89,7 @@ const COUNTRY_OPTIONS = [
   { id: 'UAE & Middle East (AED)', label: 'UAE & Middle East (AED)' },
 ]
 
-export function Contact() {
+export function Contact({ initialIntent = 'free_prototype' }: { initialIntent?: OnboardingIntent }) {
   const { toast } = useToast()
   const [account, setAccount] = useState<AppAccountSession | null>(() => getRememberedSession())
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -121,7 +121,7 @@ export function Contact() {
 
 
   const [formData, setFormData] = useState({
-    onboardingIntent: 'free_prototype' as OnboardingIntent,
+    onboardingIntent: initialIntent,
     name: '',
     handle: '',
     niche: 'Fashion & Luxury Apparel',
@@ -132,6 +132,10 @@ export function Contact() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+
+  useEffect(() => {
+    setFormData(previous => ({ ...previous, onboardingIntent: initialIntent }))
+  }, [initialIntent])
 
   // Listen for CTA selections from Hero or Pricing sections
   useEffect(() => {
@@ -459,7 +463,7 @@ export function Contact() {
         <div><h2>Find your direction.</h2><p>A few starting points. An entirely personal result.</p></div>
         <details className="sample-disclosure"><summary>Explore sample storefronts <span aria-hidden="true">+</span></summary><div className="sample-links">{SAMPLE_WEBSITES.map(site => <a href={site.url} key={site.id} target="_blank" rel="noopener noreferrer">{site.name}<ArrowUpRight size={16} aria-hidden="true" /></a>)}</div></details>
       </div>
-      <div className="brief-layout" id="contact">
+      <div className="brief-layout" id="storefront-brief">
         <aside className="brief-intro">
           <h2>Make it<br />unmistakably yours.</h2>
           <p>Tell us about your world. We’ll help turn your recommendations into a storefront with a point of view.</p>

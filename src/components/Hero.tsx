@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-import { advanceMotion, seekLatest } from '@/lib/scroll-motion'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { advanceMotion } from '@/lib/scroll-motion'
+import { createVideoScrubber } from '@/lib/video-scrubber'
 import { ArrowDown, ArrowUpRight, Menu, X, Pause, Play } from 'lucide-react'
 
 const films = [
@@ -15,52 +16,64 @@ export function Hero() {
   const stage = useRef<HTMLDivElement>(null)
   const chapters = useRef<(HTMLElement | null)[]>([])
   const videos = useRef<(HTMLVideoElement | null)[]>([])
+  const bindVideos = useMemo(() => films.map((_, index) => (element: HTMLVideoElement | null) => {
+    const previous = videos.current[index]
+    if (!element && previous) queueMicrotask(() => {
+      // A ref can be rebound during a development refresh without unmounting.
+      if (previous.isConnected) return
+      previous.pause()
+      previous.removeAttribute('src')
+      previous.load() // Release the decoder and cancel an unfinished network stream.
+    })
+    videos.current[index] = element
+  }), [])
   const progressRef = useRef(0)
   const [active, setActive] = useState(0)
+  const [inView, setInView] = useState(true)
   const [menu, setMenu] = useState(false)
-  const [still, setStill] = useState(false)
+  const [still, setStill] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [failed, setFailed] = useState<Record<string, boolean>>({})
+  const scrubber = useRef<{ index: number; player: ReturnType<typeof createVideoScrubber> } | null>(null)
+  const [warm, setWarm] = useState(-1)
+  const warmed = useRef(-1)
   const [ready, setReady] = useState<Record<string, boolean>>({})
 
-  const clipCache = useRef(new Map<string, string>())
-  const [sources, setSources] = useState<Record<string, string>>({})
   const userInteracted = useRef(false)
 
-  // Blob-backed clips remain seekable on hosts without HTTP range support.
-  useEffect(() => {
-    if (still) return
-    const controller = new AbortController()
-    films.filter((_, index) => Math.abs(index - active) <= 1).forEach(film => {
-      if (clipCache.current.has(film.id)) return
-      fetch(`/films/${film.id}.mp4`, { signal: controller.signal })
-        .then(response => { if (!response.ok) throw new Error('Film unavailable'); return response.blob() })
-        .then(blob => {
-          if (controller.signal.aborted) return
-          const source = URL.createObjectURL(blob)
-          clipCache.current.set(film.id, source)
-          setSources(previous => ({ ...previous, [film.id]: source }))
-        })
-        .catch(() => { if (!controller.signal.aborted) setFailed(previous => ({ ...previous, [film.id]: true })) })
+  // Stream the visible clip immediately. No full-file Blob download or competing
+  // neighbour downloads before the first frame can appear.
+  useLayoutEffect(() => {
+    const video = videos.current[active]
+    if (still || !inView || !video) return
+    setReady(previous => ({ ...previous, [films[active].id]: false }))
+    let announced = false
+    const player = createVideoScrubber(video, () => {
+      if (announced) return
+      announced = true
+      setReady(previous => previous[films[active].id] ? previous : { ...previous, [films[active].id]: true })
     })
-    return () => controller.abort()
-  }, [active, still])
+    scrubber.current = { index: active, player }
+    player.update(progressRef.current)
+    return () => { player.dispose(); scrubber.current = null; video.pause() }
+  }, [active, still, inView])
 
   useEffect(() => {
-    const cache = clipCache.current
     const prime = () => {
       userInteracted.current = true
-      videos.current.forEach(video => {
-        if (video?.readyState && !video.dataset.primed) {
-          video.dataset.primed = 'true'
-          video.play().then(() => video.pause()).catch(() => {})
-        }
-      })
+      const video = videos.current.find(item => item?.getAttribute('data-active') === 'true')
+      if (video && !video.dataset.primed) {
+        video.dataset.primed = 'true'
+        video.play().then(() => {
+          video.pause()
+          scrubber.current?.player.update(progressRef.current, true)
+        }).catch(() => {})
+      }
     }
-    window.addEventListener('pointerdown', prime, { once: true, passive: true })
+    window.addEventListener('pointerdown', prime, { passive: true })
+    window.addEventListener('touchstart', prime, { passive: true })
     return () => {
       window.removeEventListener('pointerdown', prime)
-      cache.forEach(source => URL.revokeObjectURL(source))
-      cache.clear()
+      window.removeEventListener('touchstart', prime)
     }
   }, [])
 
@@ -74,53 +87,84 @@ export function Hero() {
 
   useEffect(() => {
     let raf = 0
+    let disposed = false
     let previous = performance.now()
     let motion = { position: progressRef.current, velocity: 0 }
     let geometry: { top: number; height: number }[] = []
+    let viewportHeight = window.innerHeight
+    let lastActive = -1
+    let visible = true
+    const wake = () => {
+      if (!disposed && !raf && visible && !document.hidden) {
+        previous = performance.now()
+        raf = requestAnimationFrame(tick)
+      }
+    }
     const measure = () => {
       geometry = chapters.current.map(chapter => {
         const rect = chapter?.getBoundingClientRect()
         return { top: (rect?.top ?? 0) + window.scrollY, height: rect?.height ?? 1 }
       })
+      // Keep the stable layout viewport on phones. URL-bar collapse must not
+      // change the film position halfway through a swipe.
+      const display = stage.current?.querySelector<HTMLElement>('.film-stage')
+      viewportHeight = display ? display.offsetHeight + Number.parseFloat(getComputedStyle(display).top) : window.innerHeight
+      wake()
+    }
+    const tick = (now: number) => {
+      raf = 0
+      const dt = Math.min(now - previous, 64)
+      previous = now
+      if (!visible || document.hidden) return
+      let index = 0
+      for (let i = 0; i < geometry.length; i++) {
+        if (geometry[i].top - window.scrollY <= viewportHeight * 0.1) index = i
+      }
+      const chapter = geometry[index]
+      if (!chapter) return
+      const target = clamp((window.scrollY - chapter.top) / Math.max(1, chapter.height - viewportHeight * (index === films.length - 1 ? 1 : 0.15)))
+      if (lastActive !== index) {
+        motion = { position: target, velocity: 0 }
+        lastActive = index
+        setActive(index)
+      }
+      motion = advanceMotion(motion, target, dt / 1000)
+      progressRef.current = motion.position
+      if (!still && scrubber.current?.index === index) scrubber.current.player.update(motion.position)
+      // Metadata for just the next film, and only once the current film is well
+      // underway. Save-Data and slow connections reserve bandwidth for this film.
+      const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection
+      if (!still && target > 0.65 && index < films.length - 1 && warmed.current !== index + 1 &&
+          !connection?.saveData && !['slow-2g', '2g', '3g'].includes(connection?.effectiveType ?? '')) {
+        warmed.current = index + 1
+        setWarm(index + 1)
+      }
+      if (!still && (Math.abs(motion.position - target) > 0.00001 || Math.abs(motion.velocity) > 0.0001)) {
+        raf = requestAnimationFrame(tick)
+      }
     }
     measure()
     const resize = new ResizeObserver(measure)
     if (stage.current) resize.observe(stage.current)
-    window.addEventListener('resize', measure)
-    let lastActive = -1
-    let visible = true
-    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting }, { rootMargin: '100px' })
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting
+      setInView(visible)
+      if (visible) wake()
+    }, { rootMargin: '100px' })
     if (stage.current) observer.observe(stage.current)
-    const tick = (now: number) => {
-      const dt = Math.min(now - previous, 64)
-      previous = now
-      if (visible && !document.hidden) {
-        let index = 0
-        for (let i = 0; i < chapters.current.length; i++) {
-          if (geometry[i] && geometry[i].top - window.scrollY <= window.innerHeight * 0.1) index = i
-        }
-        const chapter = geometry[index]
-        if (chapter) {
-          const target = clamp((window.scrollY - chapter.top) / Math.max(1, chapter.height - window.innerHeight * (index === films.length - 1 ? 1 : 0.15)))
-          if (lastActive !== index) {
-            motion = { position: target, velocity: 0 }
-            lastActive = index
-            setActive(index)
-          }
-          motion = advanceMotion(motion, target, dt / 1000)
-          progressRef.current = motion.position
-          const video = videos.current[index]
-          if (!still && video) seekLatest(video, motion.position)
-        }
-      }
-      raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
+    // Passive native scrolling; no wheel/touch interception and no idle RAF loop.
+    window.addEventListener('scroll', wake, { passive: true })
+    window.addEventListener('resize', measure)
+    document.addEventListener('visibilitychange', wake)
+    document.fonts.ready.then(() => { if (stage.current) measure() })
     return () => {
+      disposed = true
       cancelAnimationFrame(raf)
       observer.disconnect()
       resize.disconnect()
+      window.removeEventListener('scroll', wake)
       window.removeEventListener('resize', measure)
+      document.removeEventListener('visibilitychange', wake)
     }
   }, [still])
 
@@ -165,17 +209,29 @@ export function Hero() {
         <div className="film-stage" aria-label="Scroll-controlled product films">
           <div className="film-window">
             {films.map((film, index) => <div className={`film-layer ${active === index ? 'is-active' : ''}`} key={film.id} aria-hidden={active !== index}>
-              <img className="film-poster" src={`/films/${film.id}.jpg`} alt="" fetchPriority={index === 0 ? 'high' : 'auto'} loading={index === 0 ? 'eager' : 'lazy'} />
-              {!still && Math.abs(active - index) <= 1 && !failed[film.id] && sources[film.id] && <video ref={el => { videos.current[index] = el }} className={ready[film.id] ? 'is-ready' : ''} src={sources[film.id]} poster={`/films/${film.id}.jpg`} muted playsInline preload="auto" onSeeked={event => {
-                if (index === active && !still && !document.hidden) seekLatest(event.currentTarget, progressRef.current)
-              }} onLoadedData={event => {
-                const video = event.currentTarget
-                setReady(previous => ({ ...previous, [film.id]: true }))
-                if (userInteracted.current && !video.dataset.primed) {
-                  video.dataset.primed = 'true'
-                  video.play().then(() => video.pause()).catch(() => {})
-                }
-              }} onError={() => setFailed(prev => ({ ...prev, [film.id]: true }))} aria-label={`${film.category} assembly film controlled by scrolling`} />}
+              {(index === active || index === active - 1 || index === warm) && <img className="film-poster" src={`/films/${film.id}.jpg`} alt="" fetchPriority={index === 0 ? 'high' : 'auto'} loading={index === active ? 'eager' : 'lazy'} />}
+              {!still && inView && (active === index || (warm === index && index === active + 1)) && !failed[film.id] && <video
+                ref={bindVideos[index]}
+                data-active={active === index}
+                className={ready[film.id] ? 'is-ready' : ''}
+                src={`/films/${film.id}.mp4`}
+                poster={`/films/${film.id}.jpg`}
+                muted playsInline disablePictureInPicture
+                preload={index === active ? 'auto' : 'metadata'}
+                onLoadedData={event => {
+                  const video = event.currentTarget
+                  if (index !== active) return
+                  scrubber.current?.player.update(progressRef.current)
+                  if (userInteracted.current && !video.dataset.primed) {
+                    video.dataset.primed = 'true'
+                    video.play().then(() => {
+                      video.pause()
+                      if (scrubber.current?.index === index) scrubber.current.player.update(progressRef.current, true)
+                    }).catch(() => {})
+                  }
+                }}
+                onError={() => setFailed(prev => ({ ...prev, [film.id]: true }))}
+                aria-label={`${film.category} assembly film controlled by scrolling`} />}
             </div>)}
           </div>
           <button className="film-motion-control" aria-label={still ? 'Enable product motion' : 'Show still images'} aria-pressed={still} onClick={() => setStill(!still)}>{still ? <Play size={16} aria-hidden="true" /> : <Pause size={16} aria-hidden="true" />}</button>
