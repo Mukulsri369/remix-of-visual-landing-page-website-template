@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { SampleGallery } from './SampleGallery'
 import { onAuthStateChanged } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { ArrowRight, ArrowLeft, ArrowUpRight, Check, CheckCircle2, Eye, EyeOff, Loader2, LogOut } from 'lucide-react'
@@ -32,51 +33,6 @@ const ONBOARDING_INTENT_LABELS: Record<OnboardingIntent, string> = {
   creator: 'Creator Plan — ₹4,999 (One-Time Payment)',
   premium: 'Premium Plan — ₹5,999 (One-Time Payment · Best for Growing Brands)',
 }
-
-const SAMPLE_WEBSITES = [
-  {
-    id: 'sample-1',
-    badge: 'Sample 01 · Creative Studio',
-    name: 'Fresh Canvas Foundry',
-    url: 'https://fresh-canvas-foundry.lovable.app',
-    accent: 'bg-accent-emerald',
-  },
-  {
-    id: 'sample-2',
-    badge: 'Sample 02 · Visual Curation',
-    name: 'Remix Mosaic Maker',
-    url: 'https://remix-mosaic-maker.lovable.app',
-    accent: 'bg-accent-blue',
-  },
-  {
-    id: 'sample-3',
-    badge: 'Sample 03 · Editorial Motion',
-    name: 'Remix & Ripple',
-    url: 'https://remix-and-ripple.lovable.app',
-    accent: 'bg-accent-purple',
-  },
-  {
-    id: 'sample-4',
-    badge: 'Sample 04 · Niche Showcase',
-    name: 'Paws Find Forever Homes',
-    url: 'https://paws-find-forever-homes.lovable.app',
-    accent: 'bg-accent-emerald',
-  },
-  {
-    id: 'sample-5',
-    badge: 'Sample 05 · Minimalist Flagship',
-    name: 'Linea Minimalist Shopfront',
-    url: 'https://linea-minimalist-shopfront.lovable.app',
-    accent: 'bg-accent-blue',
-  },
-  {
-    id: 'sample-6',
-    badge: 'Sample 06 · Curated Storefront',
-    name: 'Our Visible Universe',
-    url: 'https://ourvisibleuniverse.store',
-    accent: 'bg-accent-purple',
-  },
-]
 
 const COUNTRY_OPTIONS = [
   { id: 'Global (All Countries)', label: 'Global (All Countries)' },
@@ -459,11 +415,8 @@ export function Contact({ initialIntent = 'free_prototype' }: { initialIntent?: 
 
   return (
     <section className="atelier-contact" aria-label="Storefront enquiry">
-      <div className="sample-edit">
-        <div><h2>Find your direction.</h2><p>A few starting points. An entirely personal result.</p></div>
-        <details className="sample-disclosure"><summary>Explore sample storefronts <span aria-hidden="true">+</span></summary><div className="sample-links">{SAMPLE_WEBSITES.map(site => <a href={site.url} key={site.id} target="_blank" rel="noopener noreferrer">{site.name}<ArrowUpRight size={16} aria-hidden="true" /></a>)}</div></details>
-      </div>
-      <div className="brief-layout" id="storefront-brief">
+      <SampleGallery />
+      <div className="brief-layout" id="contact">
         <aside className="brief-intro">
           <h2>Make it<br />unmistakably yours.</h2>
           <p>Tell us about your world. We’ll help turn your recommendations into a storefront with a point of view.</p>
