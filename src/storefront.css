@@ -1,4 +1,5 @@
 :root {
+  --film-scroll-rate: .7; /* 30% less video movement per scroll pixel. */
   --page-ground: #f2f1ed;
   --page-ink: #20231f;
   --page-soft: #666963;
@@ -40,7 +41,7 @@ body { margin: 0; background: var(--page-ground); }
 .menu-toggle { display: none; }
 .film-experience { display: grid; grid-template-columns: 42% 58%; align-items: start; position: relative; }
 .film-narrative { position: relative; }
-.film-chapter { position: relative; min-height: 150svh; display: flex; align-items: flex-start; padding: 25svh var(--page-gap) 15svh; scroll-margin-top: 0; }
+.film-chapter { position: relative; --film-travel: 135svh; --film-tail: 15svh; min-height: calc(var(--film-tail) + var(--film-travel) / var(--film-scroll-rate)); display: flex; align-items: flex-start; padding: 25svh var(--page-gap) 15svh; scroll-margin-top: 0; }
 .chapter-copy { position: sticky; top: 26svh; }
 .chapter-copy h1, .chapter-copy h2 { font-size: clamp(40px, 4.45vw, 76px); }
 .chapter-copy > p { max-width: 33ch; margin-top: 32px; font-size: clamp(16px,1.25vw,19px); line-height: 1.6; }
@@ -125,7 +126,7 @@ body { margin: 0; background: var(--page-ground); }
   .mobile-nav a, .mobile-nav button { padding: 12px 0; font-size: 20px; text-align: left; }
   .film-experience { display: block; padding-top: 0; }
   .film-narrative { z-index: 3; pointer-events: none; }
-  .film-chapter { min-height: 160svh; padding: 0 var(--page-gap); }
+  .film-chapter { --film-travel: 145svh; padding: 0 var(--page-gap); }
   .chapter-copy { top: 105px; padding-top: 105px; pointer-events: auto; }
   .chapter-copy h1, .chapter-copy h2 { font-size: clamp(36px,9.3vw,52px); max-width: 100%; }
   .chapter-copy > p { font-size: 14px; line-height: 1.55; max-width: 36ch; margin-top: 18px; }
@@ -162,8 +163,8 @@ body { margin: 0; background: var(--page-ground); }
   .chapter-copy { padding-top: 0; margin-top: 104px; top: 104px; }
   .film-window { top: max(284px, calc(42svh - 72px)); bottom: 0; }
 }
-.film-chapter:last-child { min-height: 255svh; }
-@media (max-width: 700px) { .film-chapter:last-child { min-height: 265svh; } }
+.film-chapter:last-child { --film-travel: 155svh; --film-tail: 100svh; }
+@media (max-width: 700px) { .film-chapter:last-child { --film-travel: 165svh; } }
 
 
 
