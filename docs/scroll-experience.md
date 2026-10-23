@@ -8,7 +8,7 @@ The active film streams directly from its MP4 URL. It no longer waits for a comp
 
 `video-scrubber.ts` maps progress to distinct source frames and allows one decode at a time. Seek completion waits for `requestVideoFrameCallback` to confirm presentation before scheduling the newest target. Old targets and duplicate frames are discarded, rather than queued. A bounded seek-completion fallback handles browsers that omit frame callbacks for paused video; after two missed callbacks it switches to a one-frame fallback instead of imposing that timeout on every seek. This follows the [video frame callback specification](https://wicg.github.io/video-rvfc/).
 
-`Hero.tsx` uses a critically damped spring for forward/reverse easing. Native passive scroll events wake an animation loop that stops after settling, offscreen and in hidden tabs. Geometry is cached and refreshed on layout resize/font loading. Film mapping uses the stable stage height, avoiding address-bar resize jumps on phones. Reduced motion and the explicit still-mode control retain posters without video requests. No scroll gestures are intercepted.
+`Hero.tsx` uses a critically damped spring for forward/reverse easing. Each film uses approximately 20% more scroll distance than the initial layout, slowing forward/reverse progression without adding input lag or trimming frames. Native passive scroll events wake an animation loop that stops after settling, offscreen and in hidden tabs. Geometry is cached and refreshed on layout resize/font loading. Film mapping uses the stable stage height, avoiding address-bar resize jumps on phones. Reduced motion and the explicit still-mode control retain posters without video requests. No scroll gestures are intercepted.
 
 ## Startup and account flow
 
